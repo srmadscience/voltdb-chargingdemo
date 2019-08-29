@@ -26,8 +26,7 @@ package chargingdemoprocs;
 import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
-import org.voltdb.VoltProcedure.VoltAbortException;
-import org.voltdb.types.TimestampType;
+
 
 public class AddCredit extends VoltProcedure {
 

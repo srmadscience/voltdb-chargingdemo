@@ -4,8 +4,6 @@ import org.voltdb.VoltTable;
 import org.voltdb.client.ClientResponse;
 import org.voltdb.client.ProcedureCallback;
 
-import chargingdemoprocs.ReferenceData;
-
 /* This file is part of VoltDB.
  * Copyright (C) 2008-2019 VoltDB Inc.
  *
