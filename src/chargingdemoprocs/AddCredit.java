@@ -27,7 +27,6 @@ import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
 
-
 public class AddCredit extends VoltProcedure {
 
   // @formatter:off
@@ -61,7 +60,10 @@ public class AddCredit extends VoltProcedure {
    // @formatter:on
 
   /**
-   * A VoltDB stored procedure to add credit to a user in the chargingdemo demo.
+   * A VoltDB stored procedure to add credit to a user in the chargingdemo demo. It
+   * checks that the user exists and also makes sure that this transaction hasn't
+   * already happened.
+   * 
    * @param userId
    * @param extraCredit
    * @param txnId

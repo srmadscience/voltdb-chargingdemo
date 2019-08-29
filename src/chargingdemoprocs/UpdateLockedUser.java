@@ -37,7 +37,7 @@ public class UpdateLockedUser extends VoltProcedure {
         + "FROM user_table "
         + "WHERE userid = ?;");
     
-     public static final SQLStmt removeUserLock = new SQLStmt("UPDATE user_table "
+     public static final SQLStmt removeUserLockAndUpdateJSON = new SQLStmt("UPDATE user_table "
         + "SET user_softlock_sessionid = NULL "
         + "   ,user_softlock_expiry = NULL "
         + "   ,user_json_object = ? "
@@ -46,7 +46,8 @@ public class UpdateLockedUser extends VoltProcedure {
     // @formatter:on
 
   /**
-   * Gets all the information we have about a user.
+   * Update a previously locked user. 'sessionid' is the unique id that was return by 
+   * GetAndLockUser, and is required for this to work.
    * 
    * @param userId
    * @return
@@ -69,7 +70,7 @@ public class UpdateLockedUser extends VoltProcedure {
     // If there is no lock or we're the ones who locked it...
     if (lockingSessionExpiryTimestamp == null || lockingSessionId == sessionId) {
 
-      voltQueueSQL(removeUserLock, jsonPayload,  userId);
+      voltQueueSQL(removeUserLockAndUpdateJSON, jsonPayload,  userId);
 
     } else {
       

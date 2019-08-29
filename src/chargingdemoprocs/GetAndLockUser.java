@@ -53,7 +53,8 @@ public class GetAndLockUser extends VoltProcedure {
     // @formatter:on
 
   /**
-   * Gets all the information we have about a user.
+   * Gets all the information we have about a user, while adding an expiring timestamp
+   * and an internally generated lock id that is used to do updates.
    * 
    * @param userId
    * @return
