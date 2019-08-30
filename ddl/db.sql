@@ -130,7 +130,7 @@ CREATE PROCEDURE
    
 CREATE PROCEDURE 
    PARTITION ON TABLE user_table COLUMN userid
-   FROM CLASS chargingdemoprocs.AddCredit;
+   FROM CLASS chargingdemoprocs.UpdateSession;
    
 
 echo create metadata

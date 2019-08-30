@@ -286,8 +286,8 @@ public class ChargingDemo {
 
               final long extraCredit = chooseTopUpAmount(state[oursession].getBalance(), r);
 
-              AddCreditCallback addCreditCallback = new AddCreditCallback("AddCredit", state, oursession, offset);
-              mainClient.callProcedure(addCreditCallback, "AddCredit", oursession + offset, extraCredit,
+              AddCreditCallback addCreditCallback = new AddCreditCallback("UpdateSession", state, oursession, offset);
+              mainClient.callProcedure(addCreditCallback, "UpdateSession", oursession + offset, extraCredit,
                   "AddCreditOnShortage" + "_" + state[oursession].getUserStatus() + "_" + tranCount + "_"
                       + extraCredit);
 
@@ -296,8 +296,8 @@ public class ChargingDemo {
 
               final long extraCredit = chooseTopUpAmount(state[oursession].getBalance(), r);
 
-              ReportLatencyCallback addCreditCallback = new ReportLatencyCallback("AddCredit");
-              mainClient.callProcedure(addCreditCallback, "AddCredit", oursession + offset, extraCredit,
+              ReportLatencyCallback addCreditCallback = new ReportLatencyCallback("UpdateSession");
+              mainClient.callProcedure(addCreditCallback, "UpdateSession", oursession + offset, extraCredit,
                   "AddCreditAtInterval" + "_" + state[oursession].getUserStatus() + "_" + tranCount + "_"
                       + extraCredit);
 
@@ -412,7 +412,7 @@ public class ChargingDemo {
 
         getProcPercentiles(shc, oneLineSummary, "ReportQuotaUsage");
 
-        getProcPercentiles(shc, oneLineSummary, "AddCredit");
+        getProcPercentiles(shc, oneLineSummary, "UpdateSession");
 
         getProcPercentiles(shc, oneLineSummary, "GetUser");
 

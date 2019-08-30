@@ -79,7 +79,7 @@ public class UserState {
 
   /**
    * Balance, not including effects of in flight transactions. Is updated
-   * by AddCredit and ReportQuotaUsage.
+   * by UpdateSession and ReportQuotaUsage.
    */
   long balance = 0;
 
