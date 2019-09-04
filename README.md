@@ -1,6 +1,6 @@
 # Charging Demo: A non-trivial telco focused example
 
-##Introduction
+## Introduction
 
 In this post I&#39;d like to highlight [voltdb-chargingdemo](https://github.com/srmadscience/voltdb-chargingdemo/tree/master/src), which I&#39;ve recently made available on bitbucket. Most demos are designed to be as simplistic as possible. I&#39;ve always found that frustrating, as anyone who has ever written a real world application knows that what takes two lines in a demo can take about 50 in reality. With that in mind, I wrote [voltdb-chargingdemo](https://github.com/srmadscience/voltdb-chargingdemo/tree/master/src), which is intended to demonstrate how we can help in scenarios such as telco where users are working with shared and finite resources while meeting SLAs, such as SMS messages or bandwidth. Instead of simplifying things to the point of absurdity, it tries to be realistic yet still comprehensible to outsiders.
 
@@ -12,7 +12,7 @@ My own background is in telco, and the demo is a drastically simplified represen
 
 1. &quot;[Report Usage and Reserve More](https://github.com/srmadscience/voltdb-chargingdemo/tree/master/src/chargingdemoprocs/ReportQuotaUsage.java)&quot;. In real life this is several steps, but to keep things simple we use one. In this the phone system tells VoltDB how much of a resource you&#39;ve used (&quot;Usage&quot;), and how much they think you&#39;ll need over the next 30 seconds or so (&quot;Reserve&quot;). Normal practice is to hand over a larger chunk than we think you&#39;ll need, as if you run out we may have to freeze your ability to call or internet activity, depending on your usage, until we get more. For a given user this is happening about once every 30 seconds, for each activity.
 
-##The challenges
+## The challenges
 
 All of this seems simple, but then we have to consider various other &#39;real world&#39; factors:
 
@@ -75,9 +75,9 @@ Note that in Use Cases where latency spikes are OK, scaling is usually a lot eas
 
 We also sometimes have to store device session data, which is presented to us as a JSON object. While the code allows you to [read, softlock](https://github.com/srmadscience/voltdb-chargingdemo/tree/master/src/chargingdemoprocs/GetAndLockUser.java) and [update](https://github.com/srmadscience/voltdb-chargingdemo/tree/master/src/chargingdemoprocs/UpdateLockedUser.java) this JSON it isn&#39;t currently part of the demo.
 
-##Our Schema
+## Our Schema
 
-
+![schema](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
 
 | Name | Type | Purpose | Partitioning |
 | --- | --- | --- | --- |
@@ -93,9 +93,9 @@ We also sometimes have to store device session data, which is presented to us as
 
 
 
-##How to run the demo
+## How to run the demo
 
-###Prerequisites
+### Prerequisites
 
 In the example below we assume we have access to a 4 node AWS cluster based on Ubuntu.
 
@@ -109,28 +109,28 @@ We used a cluster with the following configuration:
 - 20,000,000 users
 - Use the script [sh](https://github.com/srmadscience/voltdb-chargingdemo/blob/master/scripts/runtest.sh) to run 5 instances at the same time
 
-###Goal
+### Goal
 
 - Run 166,666 or more transactions per second.
 - 99th percentile latency needs to be 10ms or under.
 - The transactions will be  80% &quot;[Report Usage and Reserve More](https://github.com/srmadscience/voltdb-chargingdemo/blob/master/src/chargingdemoprocs/ReportQuotaUsage.java)&quot; and 20% &quot;[Add Credit](https://github.com/srmadscience/voltdb-chargingdemo/blob/master/src/chargingdemoprocs/AddCredit.java)&quot;
 - We will also call &quot;showCurrentAllocations&quot; and &quot;getTotalBalance&quot; every 10 seconds.
 
-###Steps
+### Steps
 
-####Obtain VoltDB
+#### Obtain VoltDB
 
 VoltDB can be downloaded [here](https://www.voltdb.com/try-voltdb/).
 
-####Create your cluster
+#### Create your cluster
 
 Instructions for how to do this are [here](https://docs.voltdb.com/AdminGuide/). Alternatively we can give you access to the AWS CloudFormation scripts we used if you contact us.
 
-####Obtain the Demo
+#### Obtain the Demo
 
 git clone https://sr\_mad\_science@bitbucket.org/voltdbseteam/voltdb-chargingdemo.git
 
-####Create the schema
+#### Create the schema
 
 cd voltdb-chargingdemo/ddl
 
@@ -138,7 +138,7 @@ sqlcmd --servers=vdb1 \&lt; [db.sql](https://github.com/srmadscience/voltdb-char
 
 Note that this code loads a jar file from voltdb-chargingdemo/jars.
 
-###Run ChargingDemo
+### Run ChargingDemo
 
 ChargingDemo lives in a JAR file called &#39;voltdb-chargingdemo-server.jar&#39; and takes the following parameters:
 
@@ -165,7 +165,7 @@ To make things easier we use a file called &quot;[runtest.sh](https://github.com
 
 &quot;[runtest.sh](https://github.com/srmadscience/voltdb-chargingdemo/blob/master/scripts/runtest.sh)&quot; can be persuaded to do a series of runs at increasing TPS levels and put the results in a file for later analysis, which is what we did.
 
-###Sample Results
+### Sample Results
 
 In the graph below the green line is &quot;Requested TPMS&quot; - How many transactions per millisecond we were trying to do.
 
@@ -195,6 +195,6 @@ Each [z1d.3xlarge](https://aws.amazon.com/ec2/instance-types/z1d/) provides 6 ph
 
 Each request  can and does issue multiple SQL statements. For example &quot;[Report Usage and Reserve More](https://github.com/srmadscience/voltdb-chargingdemo/blob/master/src/chargingdemoprocs/ReportQuotaUsage.java)&quot; issues between 7 and 14 each invocation, so if you want to look at this in terms of &quot;SQL statements per second&quot; the actual capacity is around 2,700,000 operations per second.
 
-##Conclusion
+## Conclusion
 
 In this blog post and accompanying demo I&#39;ve shown that VoltDB can be used to build very high performance ACID compliant applications that provide the benefits of a traditional RDBMS and run in a 100% virtualized cloud environment while providing high availability.
