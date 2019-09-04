@@ -169,6 +169,9 @@ To make things easier we use a file called &quot;[runtest.sh](https://github.com
 
 In the graph below the green line is &quot;Requested TPMS&quot; - How many transactions per millisecond we were trying to do.
 
+
+![graph](https://github.com/srmadscience/voltdb-chargingdemo/blob/master/results/sorted_raw_data_chart190725.png "graph")
+
 The red line is what we actually did. Due to the vagaries of how the test runs it&#39;s often slightly higher than &quot;Requested TPMS&quot; at the start, but then tracks it reasonably accurately.
 
 The grey line is server CPU Busy %, which is on the right hand scale. We see that it accurately aligns with &quot;Actual TPMS&quot;, which is good.
