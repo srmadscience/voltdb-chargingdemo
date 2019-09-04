@@ -77,7 +77,7 @@ We also sometimes have to store device session data, which is presented to us as
 
 ## Our Schema
 
-![schema](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+![schema](https://github.com/srmadscience/voltdb-chargingdemo/blob/master/results/chargingdemo_schema.png "Schema")
 
 | Name | Type | Purpose | Partitioning |
 | --- | --- | --- | --- |
