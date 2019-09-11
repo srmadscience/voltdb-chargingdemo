@@ -175,10 +175,6 @@ public class ReportQuotaUsage extends VoltProcedure {
 
     } else if (wantToSpend > currentBalance) {
 
-      System.out.println(userId + " " + productId + " " + unitsUsed + " " + unitsWanted + " " + inputSessionId + " "
-          + txnId + " " + whatWeCanAfford + " " + currentBalance + " " + unitCost
-          + interimResults[2].toFormattedString() + " " + interimResults[3].toFormattedString());
-
       this.setAppStatusString("Allocated " + whatWeCanAfford + " units");
       this.setAppStatusCode(ReferenceData.STATUS_SOME_UNITS_ALLOCATED);
       voltQueueSQL(createAllocation, userId, productId, whatWeCanAfford, sessionId);

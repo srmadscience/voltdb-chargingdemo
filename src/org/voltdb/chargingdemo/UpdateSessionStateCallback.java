@@ -55,12 +55,7 @@ public class UpdateSessionStateCallback implements ProcedureCallback {
         long balance = balanceTable.getLong("balance");
         long sessionid = balanceTable.getLong("session_id");
         int productid = (int) balanceTable.getLong("product_id");
-        
-        if (balance < 0) {
-          System.out.println("F");
-        }
-        
-        long allocated = 0;
+                long allocated = 0;
         
         try {
           if (allocationTable.advanceRow()) {
