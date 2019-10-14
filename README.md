@@ -140,7 +140,7 @@ Note that this code loads a jar file from voltdb-chargingdemo/jars.
 
 ### Run ChargingDemo
 
-ChargingDemo lives in a JAR file called &#39;voltdb-chargingdemo-server.jar&#39; and takes the following parameters:
+ChargingDemo lives in a JAR file called &#39;voltdb-chargingdemo-client.jar&#39; and takes the following parameters:
 
 | Name | Purpose | Example |
 | --- | --- | --- |
@@ -157,7 +157,7 @@ ChargingDemo lives in a JAR file called &#39;voltdb-chargingdemo-server.jar&#39;
 
 An invocation of the demo looks like this:
 
-java -jar ../jars/voltdb-chargingdemo-server.jar vdb1,vdb2,vdb3 1000000 1000000 32 TRANSACTIONS 10 300 10 100000 5
+java -jar ../jars/voltdb-chargingdemo-client.jar vdb1,vdb2,vdb3 1000000 1000000 32 RUN 10 300 10 100000 5
 
 
 
