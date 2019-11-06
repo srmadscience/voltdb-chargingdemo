@@ -26,7 +26,7 @@ PFILE=`date '+%Y%m%d%H%M'`perf.txt
 #
 # Kill any copies that were left running in the background because someone did ctrl-c last time...
 #
-kill -9 `ps -deaf | grep voltdb-chargingdemo-server.jar | grep -v grep | awk '{ print $2 }'` 2> /dev/null
+kill -9 `ps -deaf | grep voltdb-chargingdemo-client.jar | grep -v grep | awk '{ print $2 }'` 2> /dev/null
 
 #
 # Calculate total number of users...
@@ -36,8 +36,8 @@ TOTAL_USERCOUNT=`expr ${USERCOUNT} \* ${TCOUNT}`
 #
 # Delete a re-create that many users at 50K
 #
-java -jar ../jars/voltdb-chargingdemo-server.jar $HNAME $TOTAL_USERCOUNT 0 50 DELETE 10 600 10 100000 5
-java -jar ../jars/voltdb-chargingdemo-server.jar $HNAME $TOTAL_USERCOUNT 0 50 USERS 10 600 10 100000 5
+java -jar ../jars/voltdb-chargingdemo-client.jar $HNAME $TOTAL_USERCOUNT 0 50 DELETE 10 600 10 100000 5
+java -jar ../jars/voltdb-chargingdemo-client.jar $HNAME $TOTAL_USERCOUNT 0 50 USERS 10 600 10 100000 5
 
 
 # 
@@ -72,8 +72,8 @@ do
 		sh remotecpu.sh & 
 		# Calculate user range and offset
 		THIS_OFFSET=`expr ${JCOUNT} \* ${USERCOUNT}`
-		echo java -jar ../jars/voltdb-chargingdemo-server.jar $HNAME $USERCOUNT ${THIS_OFFSET}  $TPS_PER_THREAD  TRANSACTIONS 10 ${DURATIONSECONDS}  10 $INITIALCREDIT ${CREDITINTERVAL} > ${LFILE}_${JCOUNT}.lst  
-		java -jar ../jars/voltdb-chargingdemo-server.jar $HNAME $USERCOUNT ${THIS_OFFSET} $TPS_PER_THREAD  TRANSACTIONS 10 ${DURATIONSECONDS}  10 $INITIALCREDIT ${CREDITINTERVAL} >> ${LFILE}_${JCOUNT}.lst  &
+		echo java -jar ../jars/voltdb-chargingdemo-client.jar $HNAME $USERCOUNT ${THIS_OFFSET}  $TPS_PER_THREAD  TRANSACTIONS 10 ${DURATIONSECONDS}  10 $INITIALCREDIT ${CREDITINTERVAL} > ${LFILE}_${JCOUNT}.lst  
+		java -jar ../jars/voltdb-chargingdemo-client.jar $HNAME $USERCOUNT ${THIS_OFFSET} $TPS_PER_THREAD  TRANSACTIONS 10 ${DURATIONSECONDS}  10 $INITIALCREDIT ${CREDITINTERVAL} >> ${LFILE}_${JCOUNT}.lst  &
 		JCOUNT=`expr ${JCOUNT} + 1 ` 
 	done
 
