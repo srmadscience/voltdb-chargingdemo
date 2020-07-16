@@ -134,6 +134,7 @@ CREATE PROCEDURE
    
 echo create metadata
 
+
 insert into product_table
 (productid, productname, unit_cost)
 values
