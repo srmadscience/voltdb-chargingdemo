@@ -56,7 +56,7 @@ public class ComplainOnDifferenceCallback implements ProcedureCallback {
                 shc.incCounter("transaction_missing_when_checked");
                 
                 final String tableAsString = arg0.getResults()[0].toFormattedString();
-                ChargingDemo.msg(message + ", got " + arg0.getResults()[0].getRowCount() + System.lineSeparator() + tableAsString);
+                ChargingDemo.msg(message + ", expected=" + expectedCount + ". Got " + arg0.getResults()[0].getRowCount() + System.lineSeparator() + tableAsString);
                              
             } else {
                 shc.incCounter("transaction_found_when_checked");

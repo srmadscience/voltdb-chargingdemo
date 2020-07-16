@@ -384,7 +384,7 @@ public class ChargingDemo {
           } else {
             shc.incCounter("started");
             ComplainOnDifferenceCallback codc = new ComplainOnDifferenceCallback(
-                state[i].getUserStatus() + 1 /* Status 0 was used */ ,
+                state[i].getUserStatus() ,
                 state[i] + ":" + i + ": Expecting " + (state[i].getUserStatus()));
             mainClient.callProcedure(codc, "showTransactions", i + offset);
 
