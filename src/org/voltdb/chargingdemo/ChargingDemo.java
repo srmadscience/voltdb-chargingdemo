@@ -125,6 +125,13 @@ public class ChargingDemo {
       // A VoltDB Client object maintains multiple connections to all the
       // servers in the cluster.
       Client mainClient = connectVoltDB(hostlist);
+      
+      // Make sure required metadata exists...
+      mainClient.callProcedure("product_table.UPSERT", 0, "Our Web Site", 0);
+      mainClient.callProcedure("product_table.UPSERT", 1, "SMS messages", 1);
+      mainClient.callProcedure("product_table.UPSERT", 2, "Domestic Internet Access per GB", 20);
+      mainClient.callProcedure("product_table.UPSERT", 3, "Roaming Internet Access per GB",342);
+      mainClient.callProcedure("product_table.UPSERT", 4, "Domestic calls per minute",3);
 
       // UpdateSessionStateCallback examines responses and updates the sessionId
       // for a

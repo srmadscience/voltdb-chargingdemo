@@ -30,6 +30,8 @@ PARTITION TABLE user_recent_transactions ON COLUMN userid;
 
 CREATE INDEX urt_del_idx ON user_recent_transactions(userid, txn_time);
 
+CREATE INDEX urt_del_idx2 ON user_recent_transactions(txn_time);
+
 DR table user_recent_transactions;
 
 CREATE STREAM user_financial_events 
@@ -46,6 +48,8 @@ create table user_usage_table
 ,sessionid bigint  not null
 ,lastdate timestamp not null
 ,primary key (userid, productid,sessionid));
+
+CREATE INDEX uut_del_idx ON user_usage_table(lastdate);
 
 PARTITION TABLE user_usage_table ON COLUMN userid;
 
@@ -132,6 +136,19 @@ CREATE PROCEDURE
    PARTITION ON TABLE user_table COLUMN userid
    FROM CLASS chargingdemoprocs.AddCredit;  
    
+DROP PROCEDURE DeleteStaleAllocations IF EXISTS;
+  
+CREATE PROCEDURE DIRECTED
+   FROM CLASS chargingdemoprocs.DeleteStaleAllocations;  
+   
+DROP TASK DeleteStaleAllocationsTask IF EXISTS;
+
+CREATE TASK DeleteStaleAllocationsTask
+ON SCHEDULE DELAY 1 SECONDS
+PROCEDURE DeleteStaleAllocations ON ERROR LOG
+RUN ON PARTITIONS;
+
+
 echo create metadata
 
 
