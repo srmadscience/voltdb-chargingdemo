@@ -149,31 +149,4 @@ PROCEDURE DeleteStaleAllocations ON ERROR LOG
 RUN ON PARTITIONS;
 
 
-echo create metadata
 
-
-insert into product_table
-(productid, productname, unit_cost)
-values
-(0, 'Our Web Site', 0);
-
-insert into product_table
-(productid, productname, unit_cost)
-values
-(1, 'SMS messages', 1);
-
-insert into product_table
-(productid, productname, unit_cost)
-values
-(2, 'Domestic Internet Access per GB', 20);
-
-insert into product_table
-(productid, productname, unit_cost)
-values
-(3, 'Roaming Internet Access per GB',342);
-
-
-insert into product_table
-(productid, productname, unit_cost)
-values
-(4, 'Domestic calls per minute',3);
