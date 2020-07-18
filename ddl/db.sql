@@ -24,6 +24,8 @@ create table user_recent_transactions
 (userid bigint not null 
 ,user_txn_id varchar(128)
 ,txn_time TIMESTAMP DEFAULT NOW
+,productid bigint
+,amount bigint 
 ,primary key (userid, user_txn_id));
 
 PARTITION TABLE user_recent_transactions ON COLUMN userid;

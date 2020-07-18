@@ -38,7 +38,7 @@ public class UpsertUser extends VoltProcedure {
     
     public static final SQLStmt getTxn = new SQLStmt("SELECT txn_time FROM user_recent_transactions WHERE userid = ? AND user_txn_id = ?;");
 
-    public static final SQLStmt addTxn = new SQLStmt("INSERT INTO user_recent_transactions (userid, user_txn_id, txn_time) VALUES (?,?,NOW);");
+    public static final SQLStmt addTxn = new SQLStmt("INSERT INTO user_recent_transactions (userid, user_txn_id, txn_time, amount) VALUES (?,?,NOW,?);");
 
     public static final SQLStmt purgeTxn = new SQLStmt("DELETE FROM user_recent_transactions "
             + "WHERE userid = ? AND user_txn_id != ? AND txn_time < DATEADD( MINUTE, ?, NOW);");
@@ -88,7 +88,7 @@ public class UpsertUser extends VoltProcedure {
         } else {
 
             
-            voltQueueSQL(addTxn, userId, txnId);
+            voltQueueSQL(addTxn, userId, txnId, addBalance);
             
             if (isNew.equalsIgnoreCase("Y")) {
 

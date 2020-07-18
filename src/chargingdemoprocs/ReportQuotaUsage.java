@@ -37,7 +37,7 @@ public class ReportQuotaUsage extends VoltProcedure {
     
     public static final SQLStmt deleteOldTxns = new SQLStmt("DELETE FROM user_recent_transactions WHERE userid = ? AND txn_time < DATEADD(HOUR,?,NOW);");
     
-    public static final SQLStmt addTxn = new SQLStmt("INSERT INTO user_recent_transactions (userid, user_txn_id, txn_time) VALUES (?,?,NOW);");
+    public static final SQLStmt addTxn = new SQLStmt("INSERT INTO user_recent_transactions (userid, user_txn_id, txn_time, productid, amount) VALUES (?,?,NOW,?,?);");
 
     public static final SQLStmt getBalance = new SQLStmt("SELECT balance, CAST (? AS BIGINT) product_id,"
         + " CAST (? AS BIGINT) session_id, userid FROM user_balances WHERE userid = ?;");
@@ -113,6 +113,8 @@ public class ReportQuotaUsage extends VoltProcedure {
       return voltExecuteSQL(true);
     }
 
+    long amountSpent = unitsUsed * unitCost * -1;
+
     if (unitsUsed > 0) {
 
       // Housekeeping: Delete allocations for this user that are older than
@@ -124,7 +126,6 @@ public class ReportQuotaUsage extends VoltProcedure {
       voltQueueSQL(deleteOldTxns, userId, -1 * DELETE_TRANSACTION_HOURS);
 
       // Report spending...
-      long amountSpent = unitsUsed * unitCost * -1;
       voltQueueSQL(reportSpending, userId, amountSpent, unitsUsed + " units of product " + productId);
       voltQueueSQL(updBalance, userId);
 
@@ -136,7 +137,7 @@ public class ReportQuotaUsage extends VoltProcedure {
     voltQueueSQL(deleteAllocation, userId, productId, sessionId);
 
     // Note that transaction is now 'official'
-    voltQueueSQL(addTxn, userId, txnId);
+    voltQueueSQL(addTxn, userId, txnId, productId, amountSpent);
 
     // get credit so we can see what we can spend...
     voltQueueSQL(getRemainingCredit, userId);

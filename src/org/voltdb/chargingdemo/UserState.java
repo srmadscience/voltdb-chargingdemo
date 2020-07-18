@@ -68,9 +68,9 @@ public class UserState {
    * is created by ReportQuotaUsage. The session Ids are used so we know to
    * cancel reservations when we report usage.
    */
-  private long[] productSessionIds = new long[ChargingDemo.PRODUCT_COUNT];
+  private long[] productSessionIds = new long[ChargingDemo.PRODUCT_NAMES.length];
 
-  private long[] productAllocations = new long[ChargingDemo.PRODUCT_COUNT];
+  private long[] productAllocations = new long[ChargingDemo.PRODUCT_NAMES.length];
 
   /**
    * When a transaction started, or zero if there isn't one.

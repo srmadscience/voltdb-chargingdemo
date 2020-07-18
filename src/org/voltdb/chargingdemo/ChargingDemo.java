@@ -43,10 +43,13 @@ public class ChargingDemo {
   private static final String TASK_RUN = "RUN";
   private static final String TASK_DELETE = "DELETE";
 
-  /**
-   * How many products exist
-   */
-  public static final int PRODUCT_COUNT = 5;
+  
+  
+  public static final String[] PRODUCT_NAMES = { "Our Web Site", "SMS messages", "Domestic Internet Access per GB"
+          , "Roaming Internet Access per GB", "Domestic calls per minute"};
+  
+  public static final int[] PRODUCT_PRICES = {0,1,20,342,3};
+  
 
   /**
    * We use a counter to track progress. Unsurprisingly it starts at zero.
@@ -127,11 +130,10 @@ public class ChargingDemo {
       Client mainClient = connectVoltDB(hostlist);
       
       // Make sure required metadata exists...
-      mainClient.callProcedure("product_table.UPSERT", 0, "Our Web Site", 0);
-      mainClient.callProcedure("product_table.UPSERT", 1, "SMS messages", 1);
-      mainClient.callProcedure("product_table.UPSERT", 2, "Domestic Internet Access per GB", 20);
-      mainClient.callProcedure("product_table.UPSERT", 3, "Roaming Internet Access per GB",342);
-      mainClient.callProcedure("product_table.UPSERT", 4, "Domestic calls per minute",3);
+      for (int i=0; i < PRODUCT_NAMES.length; i++) {
+          mainClient.callProcedure("product_table.UPSERT", i, PRODUCT_NAMES[i], PRODUCT_PRICES[i]);
+      }
+      
 
       // UpdateSessionStateCallback examines responses and updates the sessionId
       // for a
@@ -267,7 +269,7 @@ public class ChargingDemo {
             inFlightCount++;
           } else {
 
-            int ourProduct = r.nextInt(PRODUCT_COUNT);
+            int ourProduct = r.nextInt(PRODUCT_NAMES.length);
             long sessionId = UserState.SESSION_NOT_STARTED;
 
             // Come up with reports on how much we used and how much we want...
@@ -369,46 +371,14 @@ public class ChargingDemo {
         msg("All entries in queue, waiting for it to drain...");
         mainClient.drain();
         msg("Queue drained...");
+        
         long transactionsPerMs = tranCount / (System.currentTimeMillis() - startMsRun);
         msg("processed " + transactionsPerMs + " entries per ms while doing transactions...");
         msg(inFlightCount + " events where a tx was in flgiht were observed");
         msg("Waiting 10 seconds - if we are using XDCR we need to wait for remote transactions to reach us");
 
         Thread.sleep(10000);
-
-        // having done all our transactions we now check to see if they all made
-        // it to the
-        // database....
-
-        msg("Checking Transactions and Users. Count= " + tranCount + "/" + state.length);
-
-        final long startCheckRun = System.currentTimeMillis();
-
-        for (int i = 0; i < state.length; i++) {
-          shc.incCounter("stateloop");
-          if (state[i].getUserStatus() == NEW_USER) {
-            shc.incCounter("neverstarted");
-          } else {
-            shc.incCounter("started");
-            ComplainOnDifferenceCallback codc = new ComplainOnDifferenceCallback(
-                state[i].getUserStatus() ,
-                state[i] + ":" + i + ": Expecting " + (state[i].getUserStatus()));
-            mainClient.callProcedure(codc, "showTransactions", i + offset);
-
-          }
-
-          if (i % 100000 == 0) {
-            msg("User=" + i);
-
-          }
-
-        }
-
-        mainClient.drain();
-
-        long entriesPerMs = tranCount / (System.currentTimeMillis() - startCheckRun);
-        msg("processed " + entriesPerMs + " entries per ms while checking...");
-
+  
         StringBuffer oneLineSummary = new StringBuffer("GREPABLE SUMMARY:");
 
         oneLineSummary.append(tpMs);

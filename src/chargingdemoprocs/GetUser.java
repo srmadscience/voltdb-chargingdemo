@@ -37,9 +37,9 @@ public class GetUser extends VoltProcedure {
     
     public static final SQLStmt getUsage = new SQLStmt("SELECT * FROM user_usage_table WHERE userid = ? ORDER BY productid, sessionid;");
 
-    public static final SQLStmt getAllTxn = new SQLStmt("SELECT user_txn_id, txn_time "
+    public static final SQLStmt getAllTxn = new SQLStmt("SELECT user_txn_id, txn_time, productid, amount "
         + "FROM user_recent_transactions "
-        + "WHERE userid = ? ORDER BY txn_time, user_txn_id;");
+        + "WHERE userid = ? ORDER BY txn_time, user_txn_id, productid, amount;");
     
     public static final SQLStmt getRemainingCredit
     = new SQLStmt("select v.userid, v.balance - sum(uut.allocated_units * p.unit_cost )  balance "

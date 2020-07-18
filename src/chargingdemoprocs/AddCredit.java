@@ -37,7 +37,7 @@ public class AddCredit extends VoltProcedure {
         + "WHERE userid = ? AND user_txn_id = ?;");
     
     public static final SQLStmt addTxn = new SQLStmt("INSERT INTO user_recent_transactions "
-        + "(userid, user_txn_id, txn_time) VALUES (?,?,NOW);");
+        + "(userid, user_txn_id, txn_time,amount) VALUES (?,?,NOW,?);");
 
     public static final SQLStmt getBalance = new SQLStmt("SELECT userid, balance FROM user_balances WHERE userid = ?;");
     
@@ -105,7 +105,7 @@ public class AddCredit extends VoltProcedure {
       // to the client.
       voltQueueSQL(getBalance, userId);
       voltQueueSQL(getRemainingCredit, userId);
-      voltQueueSQL(addTxn, userId, txnId);
+      voltQueueSQL(addTxn, userId, txnId, extraCredit);
 
     }
 
