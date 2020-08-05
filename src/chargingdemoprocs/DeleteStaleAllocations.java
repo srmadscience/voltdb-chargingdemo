@@ -31,29 +31,30 @@ public class DeleteStaleAllocations extends VoltProcedure {
 
   // @formatter:off
 
-    private static final long TIMEOUT_MS = 900000;
+    private static final long TIMEOUT_MS = 300000;
     
-    private static final long DELETE_TRANSACTION_HOURS = 5;
+    public static final SQLStmt findStaleAllocation = new SQLStmt("SELECT * FROM user_usage_table "
+            + "WHERE lastdate < DATEADD(MILLISECOND,?,NOW) "
+            + "ORDER BY lastdate,userid, productid,sessionid LIMIT 1000;");
+        
+    public static final SQLStmt deleteAllocation = new SQLStmt("DELETE FROM user_usage_table WHERE userid = ? AND productid = ? AND sessionid = ?");
     
-    private static final long MAX_DELETE_ROWS = 500;
-
-    public static final SQLStmt deleteOldTxns = new SQLStmt("DELETE FROM user_recent_transactions WHERE txn_time < DATEADD(HOUR,?,NOW) ORDER BY txn_time, userid, user_txn_id LIMIT ? ;");
-      
-    public static final SQLStmt deleteStaleAllocation = new SQLStmt("DELETE FROM user_usage_table "
-        + "WHERE lastdate < DATEADD(MILLISECOND,?,NOW) ORDER BY lastdate, userid, productid,sessionid LIMIT ?");
-    
+       
     // @formatter:on
 
     public VoltTable[] run() throws VoltAbortException {
 
         // Housekeeping: Delete allocations for this user that are older than
         // TIMEOUT_MS
-        voltQueueSQL(deleteStaleAllocation, -1 * TIMEOUT_MS, MAX_DELETE_ROWS);
+        voltQueueSQL(findStaleAllocation, -1 * TIMEOUT_MS);
+        VoltTable[] staleSessions = voltExecuteSQL();
 
-        // Housekeeping: Delete old transactions for this user that are older
-        // than
-        // DELETE_TRANSACTION_HOURS
-        voltQueueSQL(deleteOldTxns, -1 * DELETE_TRANSACTION_HOURS, MAX_DELETE_ROWS);
+        while (staleSessions[0].advanceRow()) {
+            long userid = staleSessions[0].getLong("userid");
+            long productid = staleSessions[0].getLong("productid");
+            long sessionid = staleSessions[0].getLong("sessionid");
+            voltQueueSQL(deleteAllocation, userid, productid, sessionid);
+        }
 
         return voltExecuteSQL(true);
     }

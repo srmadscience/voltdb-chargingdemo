@@ -42,19 +42,11 @@ public class ChargingDemo {
   private static final String TASK_USERS = "USERS";
   private static final String TASK_RUN = "RUN";
   private static final String TASK_DELETE = "DELETE";
-
-  
   
   public static final String[] PRODUCT_NAMES = { "Our Web Site", "SMS messages", "Domestic Internet Access per GB"
           , "Roaming Internet Access per GB", "Domestic calls per minute"};
   
   public static final int[] PRODUCT_PRICES = {0,1,20,342,3};
-  
-
-  /**
-   * We use a counter to track progress. Unsurprisingly it starts at zero.
-   */
-  private static final long NEW_USER = 0;
 
   /**
    * @param args
@@ -426,6 +418,7 @@ public class ChargingDemo {
    * @param oneLineSummary
    */
   private static void getProcPercentiles(SafeHistogramCache shc, StringBuffer oneLineSummary, String procName) {
+ 
     StatsHistogram rqu = shc.get(procName);
     oneLineSummary.append((int) rqu.getLatencyAverage());
     oneLineSummary.append(':');

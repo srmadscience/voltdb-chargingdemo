@@ -1,4 +1,6 @@
+load classes ../jars/voltdb-chargingdemo.jar;
 
+file -inlinebatch END_OF_BATCH
 
 CREATE table product_table
 (productid bigint not null primary key
@@ -21,12 +23,14 @@ PARTITION TABLE user_table ON COLUMN userid;
 DR table user_table;
 
 create table user_recent_transactions
+ MIGRATE TO TARGET user_transactions
 (userid bigint not null 
 ,user_txn_id varchar(128)
-,txn_time TIMESTAMP DEFAULT NOW
+,txn_time TIMESTAMP DEFAULT NOW  not null 
 ,productid bigint
 ,amount bigint 
-,primary key (userid, user_txn_id));
+,primary key (userid, user_txn_id))
+USING TTL 1 HOURS ON COLUMN txn_time;
 
 PARTITION TABLE user_recent_transactions ON COLUMN userid;
 
@@ -44,6 +48,7 @@ export to target finevent
 ,purpose varchar(80) not null);
 
 create table user_usage_table
+ MIGRATE TO TARGET user_usage_table_stale_entries
 (userid bigint not null
 ,productid bigint not null
 ,allocated_units bigint not null
@@ -51,7 +56,7 @@ create table user_usage_table
 ,lastdate timestamp not null
 ,primary key (userid, productid,sessionid));
 
-CREATE INDEX uut_del_idx ON user_usage_table(lastdate);
+CREATE INDEX uut_del_idx ON user_usage_table(lastdate,userid, productid,sessionid);
 
 PARTITION TABLE user_usage_table ON COLUMN userid;
 
@@ -107,8 +112,6 @@ select p.productid, p.productname, a.allocated_units, a.allocated_units * p.unit
 from product_table p, allocated_by_product a
 where p.productid = a.productid
 order by p.productid;
-
-load classes ../jars/voltdb-chargingdemo.jar;
   
 CREATE PROCEDURE 
    PARTITION ON TABLE user_table COLUMN userid
@@ -137,18 +140,24 @@ CREATE PROCEDURE
 CREATE PROCEDURE 
    PARTITION ON TABLE user_table COLUMN userid
    FROM CLASS chargingdemoprocs.AddCredit;  
+
+DROP TASK DeleteStaleAllocationsTask IF EXISTS;
    
 DROP PROCEDURE DeleteStaleAllocations IF EXISTS;
   
 CREATE PROCEDURE DIRECTED
    FROM CLASS chargingdemoprocs.DeleteStaleAllocations;  
    
-DROP TASK DeleteStaleAllocationsTask IF EXISTS;
-
 CREATE TASK DeleteStaleAllocationsTask
 ON SCHEDULE DELAY 1 SECONDS
 PROCEDURE DeleteStaleAllocations ON ERROR LOG
 RUN ON PARTITIONS;
 
+DROP TASK DeleteStaleAllocationsTask;
+
+DROP TASK PurgeWrangler IF EXISTS;
+
+CREATE TASK PurgeWrangler  FROM CLASS chargingdemotasks.PurgeWrangler WITH (10,30000) ON ERROR LOG RUN ON PARTITIONS;
 
 
+END_OF_BATCH
