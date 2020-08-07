@@ -1,4 +1,4 @@
-# Charging Demo: A non-trivial telco focused example
+https://github.com/srmadscience/voltdb-chargingdemo# Charging Demo: A non-trivial telco focused example
 
 ## Introduction
 
@@ -128,7 +128,7 @@ Instructions for how to do this are [here](https://docs.voltdb.com/AdminGuide/).
 
 #### Obtain the Demo
 
-git clone https://sr\_mad\_science@bitbucket.org/voltdbseteam/voltdb-chargingdemo.git
+git clone https://github.com/srmadscience/voltdb-chargingdemo/voltdb-chargingdemo.git
 
 #### Create the schema
 

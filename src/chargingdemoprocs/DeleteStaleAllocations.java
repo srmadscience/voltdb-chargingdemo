@@ -31,7 +31,7 @@ public class DeleteStaleAllocations extends VoltProcedure {
 
   // @formatter:off
 
-    private static final long TIMEOUT_MS = 300000;
+    public static final long TIMEOUT_MS = 300000;
     
     public static final SQLStmt findStaleAllocation = new SQLStmt("SELECT * FROM user_usage_table "
             + "WHERE lastdate < DATEADD(MILLISECOND,?,NOW) "
@@ -50,10 +50,12 @@ public class DeleteStaleAllocations extends VoltProcedure {
         VoltTable[] staleSessions = voltExecuteSQL();
 
         while (staleSessions[0].advanceRow()) {
+
             long userid = staleSessions[0].getLong("userid");
             long productid = staleSessions[0].getLong("productid");
             long sessionid = staleSessions[0].getLong("sessionid");
             voltQueueSQL(deleteAllocation, userid, productid, sessionid);
+
         }
 
         return voltExecuteSQL(true);
