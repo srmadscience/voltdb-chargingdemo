@@ -157,7 +157,7 @@ DROP TASK DeleteStaleAllocationsTask;
 
 DROP TASK PurgeWrangler IF EXISTS;
 
-CREATE TASK PurgeWrangler  FROM CLASS chargingdemotasks.PurgeWrangler WITH (10,30000) ON ERROR LOG RUN ON PARTITIONS;
+CREATE TASK PurgeWrangler  FROM CLASS chargingdemotasks.PurgeWrangler WITH (10,30000) ON ERROR LOG RUN ON PARTITIONS DISABLE;
 
 
 END_OF_BATCH

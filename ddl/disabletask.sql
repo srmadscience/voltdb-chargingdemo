@@ -1,0 +1,2 @@
+ALTER TASK PurgeWrangler DISABLE;
+

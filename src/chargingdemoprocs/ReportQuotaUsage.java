@@ -109,7 +109,7 @@ public class ReportQuotaUsage extends VoltProcedure {
     // Sanity Check: Is this a re-send of a transaction we've already done?
     if (results[2].advanceRow()) {
       this.setAppStatusCode(ReferenceData.TXN_ALREADY_HAPPENED);
-      this.setAppStatusString("Event already happened at " + results[4].getTimestampAsTimestamp("txn_time").toString());
+      this.setAppStatusString("Event already happened at " + results[2].getTimestampAsTimestamp("txn_time").toString());
       return voltExecuteSQL(true);
     }
 
