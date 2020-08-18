@@ -158,7 +158,7 @@ public long getProductAllocation(int productId) {
     }
 
     productSessionIds[productId] = sessionid;
-    productSessionIds[productId] = allocation;
+    productAllocations[productId] = allocation;
 
     if (statusByte == ReferenceData.STATUS_ALL_UNITS_ALLOCATED) {
       shc.reportLatency("STATUS_ALL_UNITS_ALLOCATED", txStartMs, "", 50);
