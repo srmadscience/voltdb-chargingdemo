@@ -58,6 +58,8 @@ create table user_usage_table
 
 CREATE INDEX uut_del_idx ON user_usage_table(lastdate,userid, productid,sessionid);
 
+CREATE INDEX uut_del_idx2 ON user_usage_table(userid, lastdate,productid,sessionid);
+
 PARTITION TABLE user_usage_table ON COLUMN userid;
 
 DR table user_usage_table;
