@@ -49,7 +49,8 @@ public class GetUser extends VoltProcedure {
                + "where v.userid = ? "
                + "and   v.userid = uut.userid "
                + "and   p.productid = uut.productid "
-               + "group by v.userid, v.balance;");
+               + "group by v.userid, v.balance "
+               + "order by v.userid, v.balance;");
     
     public static final SQLStmt getTotalView = new SQLStmt("SELECT * FROM user_balance_total_view WHERE userid = ?;");    
 

@@ -49,7 +49,8 @@ public class AddCredit extends VoltProcedure {
                    + "where v.userid = ? "
                    + "and   v.userid = uut.userid "
                    + "and   p.productid = uut.productid "
-                   + "group by v.userid, v.balance;");
+                   + "group by v.userid, v.balance "
+                   + "order by v.userid, v.balance;");
     
     public static final SQLStmt addCredit = new SQLStmt(
         "INSERT INTO user_financial_events (userid   ,amount, purpose)    VALUES (?,?,?);");

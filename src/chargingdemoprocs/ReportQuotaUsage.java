@@ -50,7 +50,8 @@ public class ReportQuotaUsage extends VoltProcedure {
                    + "where v.userid = ? "
                    + "and   v.userid = uut.userid "
                    + "and   p.productid = uut.productid "
-                   + "group by v.userid, v.balance;");
+                   + "group by v.userid, v.balance "
+                   + "order by v.userid, v.balance;");
     
     public static final SQLStmt getProduct = new SQLStmt("SELECT unit_cost FROM product_table WHERE productid = ?;");
     
