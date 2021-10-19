@@ -1,7 +1,5 @@
 package chargingdemoprocs;
 
-import java.util.Date;
-
 /* This file is part of VoltDB.
  * Copyright (C) 2008-2018 VoltDB Inc.
  *
@@ -28,7 +26,6 @@ import java.util.Date;
 import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
-import org.voltdb.types.TimestampType;
 
 public class ReportQuotaUsage extends VoltProcedure {
 
@@ -70,17 +67,12 @@ public class ReportQuotaUsage extends VoltProcedure {
     public static final SQLStmt updBalance = new SQLStmt(
         "upsert into user_balances select userid, tran_count, balance from user_balance_total_view where userid = ?;");
 
-    public static final SQLStmt getOldestTxn = new SQLStmt("SELECT user_txn_id, txn_time "
+    public static final SQLStmt removeOldestTransaction = new SQLStmt("DELETE " 
             + "FROM user_recent_transactions "
             + "WHERE userid = ? "
+            + "AND txn_time < DATEADD(MILLISECOND,?,NOW)"
             + "ORDER BY txn_time,userid,user_txn_id LIMIT 1;");
 
-    public static final SQLStmt deleteOldTxn = new SQLStmt("DELETE FROM user_recent_transactions "
-            + "WHERE userid = ? AND user_txn_id = ?;");
-
-  
-    private static final long TIMEOUT_MS = 600000;
-    
     private static final long FIVE_MINUTES_IN_MS = 1000 * 60 * 5;
 
     
@@ -100,7 +92,7 @@ public class ReportQuotaUsage extends VoltProcedure {
     voltQueueSQL(getUser, userId);
     voltQueueSQL(getProduct, productId);
     voltQueueSQL(getTxn, userId, txnId);
-    voltQueueSQL(getOldestTxn, userId);
+    voltQueueSQL(removeOldestTransaction, userId,FIVE_MINUTES_IN_MS);
 
     VoltTable[] results = voltExecuteSQL();
 
@@ -192,17 +184,6 @@ public class ReportQuotaUsage extends VoltProcedure {
       voltQueueSQL(createAllocation, userId, productId, unitsWanted, sessionId);
 
     }
-
-    // Delete oldest record if old enough
-    if (results[3].advanceRow()) {
-        TimestampType oldestTxn = results[3].getTimestampAsTimestamp("txn_time");
-        
-        if (oldestTxn.asExactJavaDate().before(new Date(getTransactionTime().getTime() - FIVE_MINUTES_IN_MS))) {
-            String oldestTxnId = results[3].getString("user_txn_id");
-            voltQueueSQL(deleteOldTxn, userId, oldestTxnId);
-        }
-     }
-
 
     voltQueueSQL(getCurrentAllocation, userId, productId, sessionId);
     voltQueueSQL(getRemainingCredit, userId);
