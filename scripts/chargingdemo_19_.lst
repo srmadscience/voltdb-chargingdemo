@@ -1,0 +1,89 @@
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 0 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 0, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 100000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 100000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 200000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 200000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 300000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 300000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 400000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 400000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 500000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 500000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 600000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 600000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 700000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 700000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 800000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 800000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar 100.26.192.42 100000 900000 1 TRANSACTIONS 10 180 10 100000 5
+2020-08-31 12:21:55:Parameters:[100.26.192.42, 100000, 900000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-08-31 12:21:55:Logging into VoltDB
+2020-08-31 12:21:55:Connect to 100.26.192.42...
+2020-08-31 12:23:12:Operation timed out
+2020-08-31 12:23:12:No connections.
+java -jar ../jars/voltdb-chargingdemo-client.jar localhost 100000 0 19 TRANSACTIONS 10 180 10 100000 5
+2020-10-30 18:41:47:Parameters:[localhost, 100000, 0, 19, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-10-30 18:41:47:Logging into VoltDB
+2020-10-30 18:41:47:Connect to localhost...
+2020-10-30 18:41:48:Transaction 1
+2020-10-30 18:41:48:Query user #42...
+2020-10-30 18:41:48:Error Code VOLTDB ERROR: UNEXPECTED FAILURE: java.lang.NullPointerException
+
+2020-10-30 18:41:48:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY  USER_OWNING_CLUSTER  USER_VALIDATED_BALANCE  USER_VALIDATED_BALANCE_TIMESTAMP 
+------- ----------------- --------------------------- ------------------------ --------------------- -------------------- ----------------------- ---------------------------------
+     42 { "payload":"" }  2020-10-30 18:14:36.433000                      NULL NULL                                     0                       0 2020-10-30 18:14:35.440000       
+
+2020-10-30 18:41:48:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID  CLUSTERID  LASTDATE 
+------- ---------- ---------------- ---------- ---------- ---------
+
+2020-10-30 18:41:48:
+USERID  USER_TXN_ID  REPLACE_USER_TXN_ID  CLUSTERID  TXN_TIME                    PRODUCTID  AMOUNT  PURPOSE 
+------- ------------ -------------------- ---------- --------------------------- ---------- ------- --------
+     42 Create_42    NULL                          0 2020-10-30 18:14:36.440000        NULL  100000 NULL    
+
+2020-10-30 18:41:48:Show amount of credit currently reserved for products...
+2020-10-30 18:41:48:
+PRODUCTID  PRODUCTNAME  ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------ ---------------- --------------
+
+2020-10-30 18:41:48:Show total credit held by system...
+2020-10-30 18:41:48:Procedure getTotalBalance was not found

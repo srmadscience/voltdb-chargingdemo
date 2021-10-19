@@ -1,0 +1,1347 @@
+java -jar ../jars/voltdb-chargingdemo-client.jar localhost 100000 900000 1 TRANSACTIONS 10 180 10 100000 5
+2020-11-06 09:26:52:Parameters:[localhost, 100000, 900000, 1, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-11-06 09:26:52:Logging into VoltDB
+2020-11-06 09:26:53:Connect to localhost...
+2020-11-06 09:26:55:Transaction 1
+2020-11-06 09:26:55:Query user #42...
+2020-11-06 09:26:55:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:26:55:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:26:55:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID  LASTDATE 
+------- ---------- ---------------- ---------- ---------
+
+2020-11-06 09:26:55:
+USER_TXN_ID  TXN_TIME                    PRODUCTID  AMOUNT 
+------------ --------------------------- ---------- -------
+Create_42    2020-11-06 09:12:55.587000        NULL  100000
+
+2020-11-06 09:26:55:
+USERID  BALANCE 
+------- --------
+
+2020-11-06 09:26:55:Show amount of credit currently reserved for products...
+2020-11-06 09:26:55:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                               27227              0
+         1 SMS messages                               29730          29730
+         2 Domestic Internet Access per GB            28345         566900
+         3 Roaming Internet Access per GB             30239       10341738
+         4 Domestic calls per minute                  26644          79932
+
+2020-11-06 09:26:55:Show total credit held by system...
+2020-11-06 09:26:55:
+BALANCE     
+------------
+ 96732772321
+
+2020-11-06 09:27:05:Query user #42...
+2020-11-06 09:27:06:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:27:06:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:27:06:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:27:06:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3  2020-11-06 09:27:05.536000           3       0
+
+2020-11-06 09:27:06:
+USERID  BALANCE 
+------- --------
+     42    73666
+
+2020-11-06 09:27:06:Show amount of credit currently reserved for products...
+2020-11-06 09:27:06:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             1352130              0
+         1 SMS messages                             1363464        1363464
+         2 Domestic Internet Access per GB          1376502       27530040
+         3 Roaming Internet Access per GB           1374722      470154924
+         4 Domestic calls per minute                1385275        4155825
+
+2020-11-06 09:27:06:Show total credit held by system...
+2020-11-06 09:27:06:
+BALANCE     
+------------
+ 96731539472
+
+2020-11-06 09:27:15:Query user #42...
+2020-11-06 09:27:15:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:27:15:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:27:15:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:27:15:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3  2020-11-06 09:27:05.536000           3       0
+
+2020-11-06 09:27:15:
+USERID  BALANCE 
+------- --------
+     42    73666
+
+2020-11-06 09:27:16:Show amount of credit currently reserved for products...
+2020-11-06 09:27:16:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             3020709              0
+         1 SMS messages                             3030061        3030061
+         2 Domestic Internet Access per GB          3038122       60762440
+         3 Roaming Internet Access per GB           3026577     1035089334
+         4 Domestic calls per minute                3097384        9292152
+
+2020-11-06 09:27:16:Show total credit held by system...
+2020-11-06 09:27:16:
+BALANCE     
+------------
+ 96726747790
+
+2020-11-06 09:27:25:Query user #42...
+2020-11-06 09:27:25:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:27:25:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:27:25:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:27:25:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3  2020-11-06 09:27:05.536000           3       0
+
+2020-11-06 09:27:25:
+USERID  BALANCE 
+------- --------
+     42    73666
+
+2020-11-06 09:27:25:Show amount of credit currently reserved for products...
+2020-11-06 09:27:25:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             5483803              0
+         1 SMS messages                             5453577        5453577
+         2 Domestic Internet Access per GB          5473482      109469640
+         3 Roaming Internet Access per GB           5457307     1866398994
+         4 Domestic calls per minute                5534785       16604355
+
+2020-11-06 09:27:25:Show total credit held by system...
+2020-11-06 09:27:25:
+BALANCE     
+------------
+ 96711212597
+
+2020-11-06 09:27:35:Query user #42...
+2020-11-06 09:27:35:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:27:35:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:27:35:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:27:35:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3  2020-11-06 09:27:05.536000           3       0
+
+2020-11-06 09:27:35:
+USERID  BALANCE 
+------- --------
+     42    73666
+
+2020-11-06 09:27:35:Show amount of credit currently reserved for products...
+2020-11-06 09:27:35:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             8282965              0
+         1 SMS messages                             8242226        8242226
+         2 Domestic Internet Access per GB          8243904      164878080
+         3 Roaming Internet Access per GB           8231554     2815191468
+         4 Domestic calls per minute                8323422       24970266
+
+2020-11-06 09:27:35:Show total credit held by system...
+2020-11-06 09:27:35:
+BALANCE     
+------------
+ 96683289409
+
+2020-11-06 09:27:45:Query user #42...
+2020-11-06 09:27:45:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:27:45:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:27:45:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:27:45:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3  2020-11-06 09:27:05.536000           3       0
+
+2020-11-06 09:27:45:
+USERID  BALANCE 
+------- --------
+     42    73666
+
+2020-11-06 09:27:45:Show amount of credit currently reserved for products...
+2020-11-06 09:27:45:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            10758156              0
+         1 SMS messages                            10716484       10716484
+         2 Domestic Internet Access per GB         10726671      214533420
+         3 Roaming Internet Access per GB          10698681     3658948902
+         4 Domestic calls per minute               10791970       32375910
+
+2020-11-06 09:27:45:Show total credit held by system...
+2020-11-06 09:27:46:
+BALANCE     
+------------
+ 96648618085
+
+2020-11-06 09:27:55:Query user #42...
+2020-11-06 09:27:56:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:27:56:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:27:56:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:27:56:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3  2020-11-06 09:27:05.536000           3       0
+
+2020-11-06 09:27:56:
+USERID  BALANCE 
+------- --------
+     42    73666
+
+2020-11-06 09:27:56:Show amount of credit currently reserved for products...
+2020-11-06 09:27:56:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            12734573              0
+         1 SMS messages                            12727744       12727744
+         2 Domestic Internet Access per GB         12752356      255047120
+         3 Roaming Internet Access per GB          12682115     4337283330
+         4 Domestic calls per minute               12782344       38347032
+
+2020-11-06 09:27:56:Show total credit held by system...
+2020-11-06 09:27:56:
+BALANCE     
+------------
+ 96615834132
+
+2020-11-06 09:28:05:Query user #42...
+2020-11-06 09:28:06:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:28:06:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:28:06:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:28:06:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3  2020-11-06 09:27:05.536000           3       0
+
+2020-11-06 09:28:06:
+USERID  BALANCE 
+------- --------
+     42    73666
+
+2020-11-06 09:28:06:Show amount of credit currently reserved for products...
+2020-11-06 09:28:06:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            15106407              0
+         1 SMS messages                            15112729       15112729
+         2 Domestic Internet Access per GB         15125545      302510900
+         3 Roaming Internet Access per GB          15053920     5148440640
+         4 Domestic calls per minute               15155491       45466473
+
+2020-11-06 09:28:06:Show total credit held by system...
+2020-11-06 09:28:06:
+BALANCE     
+------------
+ 96568677340
+
+2020-11-06 09:28:07:Transaction 100001
+2020-11-06 09:28:15:Query user #42...
+2020-11-06 09:28:15:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:28:15:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:28:15:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:28:15:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3  2020-11-06 09:27:05.536000           3       0
+
+2020-11-06 09:28:15:
+USERID  BALANCE 
+------- --------
+     42    73666
+
+2020-11-06 09:28:15:Show amount of credit currently reserved for products...
+2020-11-06 09:28:15:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            17555043              0
+         1 SMS messages                            17608133       17608133
+         2 Domestic Internet Access per GB         17615483      352309660
+         3 Roaming Internet Access per GB          17524050     5993225100
+         4 Domestic calls per minute               17620920       52862760
+
+2020-11-06 09:28:15:Show total credit held by system...
+2020-11-06 09:28:15:
+BALANCE     
+------------
+ 96512660218
+
+2020-11-06 09:28:25:Query user #42...
+2020-11-06 09:28:25:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:28:25:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:28:25:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:28:25:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+
+2020-11-06 09:28:25:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:28:25:Show amount of credit currently reserved for products...
+2020-11-06 09:28:25:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            19821539              0
+         1 SMS messages                            19888645       19888645
+         2 Domestic Internet Access per GB         19894040      397880800
+         3 Roaming Internet Access per GB          19799563     6771450546
+         4 Domestic calls per minute               19922561       59767683
+
+2020-11-06 09:28:25:Show total credit held by system...
+2020-11-06 09:28:25:
+BALANCE     
+------------
+ 96453800913
+
+2020-11-06 09:28:35:Query user #42...
+2020-11-06 09:28:36:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:28:36:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:28:36:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:28:36:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+
+2020-11-06 09:28:36:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:28:36:Show amount of credit currently reserved for products...
+2020-11-06 09:28:36:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            21744774              0
+         1 SMS messages                            21803271       21803271
+         2 Domestic Internet Access per GB         21779643      435592860
+         3 Roaming Internet Access per GB          21692252     7418750184
+         4 Domestic calls per minute               21839114       65517342
+
+2020-11-06 09:28:36:Show total credit held by system...
+2020-11-06 09:28:36:
+BALANCE     
+------------
+ 96402798283
+
+2020-11-06 09:28:45:Query user #42...
+2020-11-06 09:28:45:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:28:45:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:28:45:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          0               51  3401658730323263491 2020-11-06 09:28:40.536000 
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:28:45:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+ReportQuotaUsage_3_156682_0_0  2020-11-06 09:28:40.536000           0       0
+
+2020-11-06 09:28:45:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:28:45:Show amount of credit currently reserved for products...
+2020-11-06 09:28:46:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            23854195              0
+         1 SMS messages                            23908173       23908173
+         2 Domestic Internet Access per GB         23870492      477409840
+         3 Roaming Internet Access per GB          23773548     8130553416
+         4 Domestic calls per minute               23947573       71842719
+
+2020-11-06 09:28:46:Show total credit held by system...
+2020-11-06 09:28:46:
+BALANCE     
+------------
+ 96340818490
+
+2020-11-06 09:28:55:Query user #42...
+2020-11-06 09:28:55:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:28:55:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:28:55:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          0               51  3401658730323263491 2020-11-06 09:28:40.536000 
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:28:55:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+ReportQuotaUsage_3_156682_0_0  2020-11-06 09:28:40.536000           0       0
+
+2020-11-06 09:28:55:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:28:55:Show amount of credit currently reserved for products...
+2020-11-06 09:28:56:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            26174711              0
+         1 SMS messages                            26246136       26246136
+         2 Domestic Internet Access per GB         26201382      524027640
+         3 Roaming Internet Access per GB          26078963     8919005346
+         4 Domestic calls per minute               26291997       78875991
+
+2020-11-06 09:28:56:Show total credit held by system...
+2020-11-06 09:28:56:
+BALANCE     
+------------
+ 96270254907
+
+2020-11-06 09:29:05:Transaction 200001
+2020-11-06 09:29:05:Query user #42...
+2020-11-06 09:29:05:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:29:05:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:29:05:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          0               51  3401658730323263491 2020-11-06 09:28:40.536000 
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:29:05:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+ReportQuotaUsage_3_156682_0_0  2020-11-06 09:28:40.536000           0       0
+
+2020-11-06 09:29:05:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:29:05:Show amount of credit currently reserved for products...
+2020-11-06 09:29:05:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            28062540              0
+         1 SMS messages                            28155086       28155086
+         2 Domestic Internet Access per GB         28144775      562895500
+         3 Roaming Internet Access per GB          28000051     9576017442
+         4 Domestic calls per minute               28171474       84514422
+
+2020-11-06 09:29:05:Show total credit held by system...
+2020-11-06 09:29:05:
+BALANCE     
+------------
+ 96204042780
+
+2020-11-06 09:29:15:Query user #42...
+2020-11-06 09:29:16:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:29:16:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:29:16:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          0               51  3401658730323263491 2020-11-06 09:28:40.536000 
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:29:16:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+ReportQuotaUsage_3_156682_0_0  2020-11-06 09:28:40.536000           0       0
+
+2020-11-06 09:29:16:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:29:16:Show amount of credit currently reserved for products...
+2020-11-06 09:29:16:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            30052108              0
+         1 SMS messages                            30144529       30144529
+         2 Domestic Internet Access per GB         30140617      602812340
+         3 Roaming Internet Access per GB          29960459    10246476978
+         4 Domestic calls per minute               30181882       90545646
+
+2020-11-06 09:29:16:Show total credit held by system...
+2020-11-06 09:29:16:
+BALANCE     
+------------
+ 96135548576
+
+2020-11-06 09:29:25:Query user #42...
+2020-11-06 09:29:26:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:29:26:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:29:26:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          0               51  3401658730323263491 2020-11-06 09:28:40.536000 
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:29:26:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+ReportQuotaUsage_3_156682_0_0  2020-11-06 09:28:40.536000           0       0
+
+2020-11-06 09:29:26:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:29:26:Show amount of credit currently reserved for products...
+2020-11-06 09:29:26:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            32503041              0
+         1 SMS messages                            32611307       32611307
+         2 Domestic Internet Access per GB         32612798      652255960
+         3 Roaming Internet Access per GB          32404166    11082224772
+         4 Domestic calls per minute               32622128       97866384
+
+2020-11-06 09:29:26:Show total credit held by system...
+2020-11-06 09:29:26:
+BALANCE     
+------------
+ 96046402169
+
+2020-11-06 09:29:35:Query user #42...
+2020-11-06 09:29:37:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:29:37:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:29:37:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          0               51  3401658730323263491 2020-11-06 09:28:40.536000 
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:29:37:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+ReportQuotaUsage_3_156682_0_0  2020-11-06 09:28:40.536000           0       0
+
+2020-11-06 09:29:37:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:29:37:Show amount of credit currently reserved for products...
+2020-11-06 09:29:37:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            34527879              0
+         1 SMS messages                            34630435       34630435
+         2 Domestic Internet Access per GB         34624738      692494760
+         3 Roaming Internet Access per GB          34398146    11764165932
+         4 Domestic calls per minute               34644225      103932675
+
+2020-11-06 09:29:37:Show total credit held by system...
+2020-11-06 09:29:38:
+BALANCE     
+------------
+ 95968811184
+
+2020-11-06 09:29:45:Query user #42...
+2020-11-06 09:29:46:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-11-06 09:12:55.575000                      NULL NULL                 
+
+2020-11-06 09:29:46:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42           1   100000
+
+2020-11-06 09:29:46:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          0               51  3401658730323263491 2020-11-06 09:28:40.536000 
+     42          2               88  3401658539667668995 2020-11-06 09:28:17.808000 
+     42          3               77  3401657933405093891 2020-11-06 09:27:05.536000 
+
+2020-11-06 09:29:46:
+USER_TXN_ID                    TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------ --------------------------- ---------- -------
+Create_42                      2020-11-06 09:12:55.587000        NULL  100000
+ReportQuotaUsage_1_10865_0_3   2020-11-06 09:27:05.536000           3       0
+ReportQuotaUsage_2_126792_0_2  2020-11-06 09:28:17.808000           2       0
+ReportQuotaUsage_3_156682_0_0  2020-11-06 09:28:40.536000           0       0
+
+2020-11-06 09:29:46:
+USERID  BALANCE 
+------- --------
+     42    71906
+
+2020-11-06 09:29:46:Show amount of credit currently reserved for products...
+2020-11-06 09:29:46:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                            36065939              0
+         1 SMS messages                            36189787       36189787
+         2 Domestic Internet Access per GB         36187793      723755860
+         3 Roaming Internet Access per GB          35944516    12293024472
+         4 Domestic calls per minute               36201765      108605295
+
+2020-11-06 09:29:46:Show total credit held by system...
+2020-11-06 09:29:46:
+BALANCE     
+------------
+ 95907535052
+
+2020-11-06 09:29:54:272444 transactions done...
+2020-11-06 09:29:54:All entries in queue, waiting for it to drain...
+2020-11-06 09:29:55:Queue drained...
+2020-11-06 09:29:55:processed 1 entries per ms while doing transactions...
+2020-11-06 09:29:55:4111 events where a tx was in flgiht were observed
+2020-11-06 09:29:55:Waiting 10 seconds - if we are using XDCR we need to wait for remote transactions to reach us
+2020-11-06 09:30:05:GREPABLE SUMMARY:1:1:229:249:249:0:0:0:46:49:49:46:49:49:42:49:49:
+2020-11-06 09:30:05:Closing connection...
+2020-11-06 09:30:05:Stats Histogram:
+2020-11-06 09:30:05:{AddCredit=AddCredit 
+ Reports=           13719 Average=             228, Total=       3,127,658, 50%=             249, 95%=             249, 99%=             249, 99.5%=             249, 99.95%=             249, Max=             249
+0	5.0	AddCredit
+1	9.0	AddCredit
+2	6.0	AddCredit
+3	13.0	AddCredit
+4	12.0	AddCredit
+5	7.0	AddCredit
+6	7.0	AddCredit
+7	7.0	AddCredit
+8	7.0	AddCredit
+9	17.0	AddCredit
+10	6.0	AddCredit
+11	12.0	AddCredit
+12	9.0	AddCredit
+13	5.0	AddCredit
+14	6.0	AddCredit
+15	6.0	AddCredit
+16	2.0	AddCredit
+17	6.0	AddCredit
+18	4.0	AddCredit
+19	3.0	AddCredit
+20	2.0	AddCredit
+21	7.0	AddCredit
+22	6.0	AddCredit
+23	1.0	AddCredit
+24	5.0	AddCredit
+25	2.0	AddCredit
+26	3.0	AddCredit
+27	5.0	AddCredit
+28	4.0	AddCredit
+29	3.0	AddCredit
+30	6.0	AddCredit
+31	4.0	AddCredit
+32	5.0	AddCredit
+33	6.0	AddCredit
+34	6.0	AddCredit
+35	2.0	AddCredit
+36	5.0	AddCredit
+37	4.0	AddCredit
+38	2.0	AddCredit
+39	8.0	AddCredit
+40	3.0	AddCredit
+41	4.0	AddCredit
+42	5.0	AddCredit
+43	3.0	AddCredit
+44	7.0	AddCredit
+45	5.0	AddCredit
+46	5.0	AddCredit
+47	6.0	AddCredit
+48	7.0	AddCredit
+49	8.0	AddCredit
+50	12.0	AddCredit
+51	7.0	AddCredit
+52	3.0	AddCredit
+53	6.0	AddCredit
+54	9.0	AddCredit
+55	11.0	AddCredit
+56	7.0	AddCredit
+57	11.0	AddCredit
+58	8.0	AddCredit
+59	6.0	AddCredit
+60	10.0	AddCredit
+61	4.0	AddCredit
+62	5.0	AddCredit
+63	6.0	AddCredit
+64	8.0	AddCredit
+65	15.0	AddCredit
+66	7.0	AddCredit
+67	12.0	AddCredit
+68	11.0	AddCredit
+69	7.0	AddCredit
+70	9.0	AddCredit
+71	11.0	AddCredit
+72	7.0	AddCredit
+73	9.0	AddCredit
+74	15.0	AddCredit
+75	15.0	AddCredit
+76	14.0	AddCredit
+77	12.0	AddCredit
+78	15.0	AddCredit
+79	8.0	AddCredit
+80	9.0	AddCredit
+81	11.0	AddCredit
+82	6.0	AddCredit
+83	15.0	AddCredit
+84	12.0	AddCredit
+85	10.0	AddCredit
+86	13.0	AddCredit
+87	5.0	AddCredit
+88	9.0	AddCredit
+89	9.0	AddCredit
+90	10.0	AddCredit
+91	10.0	AddCredit
+92	12.0	AddCredit
+93	8.0	AddCredit
+94	13.0	AddCredit
+95	7.0	AddCredit
+96	15.0	AddCredit
+97	11.0	AddCredit
+98	12.0	AddCredit
+99	10.0	AddCredit
+100	10.0	AddCredit
+101	12.0	AddCredit
+102	17.0	AddCredit
+103	6.0	AddCredit
+104	12.0	AddCredit
+105	11.0	AddCredit
+106	16.0	AddCredit
+107	9.0	AddCredit
+108	6.0	AddCredit
+109	8.0	AddCredit
+110	11.0	AddCredit
+111	11.0	AddCredit
+112	12.0	AddCredit
+113	9.0	AddCredit
+114	12.0	AddCredit
+115	10.0	AddCredit
+116	10.0	AddCredit
+117	15.0	AddCredit
+118	11.0	AddCredit
+119	9.0	AddCredit
+120	7.0	AddCredit
+121	16.0	AddCredit
+122	8.0	AddCredit
+123	14.0	AddCredit
+124	11.0	AddCredit
+125	14.0	AddCredit
+126	5.0	AddCredit
+127	16.0	AddCredit
+128	11.0	AddCredit
+129	14.0	AddCredit
+130	14.0	AddCredit
+131	15.0	AddCredit
+132	20.0	AddCredit
+133	16.0	AddCredit
+134	15.0	AddCredit
+135	16.0	AddCredit
+136	15.0	AddCredit
+137	8.0	AddCredit
+138	9.0	AddCredit
+139	12.0	AddCredit
+140	11.0	AddCredit
+141	14.0	AddCredit
+142	11.0	AddCredit
+143	17.0	AddCredit
+144	14.0	AddCredit
+145	13.0	AddCredit
+146	16.0	AddCredit
+147	6.0	AddCredit
+148	17.0	AddCredit
+149	11.0	AddCredit
+150	12.0	AddCredit
+151	14.0	AddCredit
+152	15.0	AddCredit
+153	7.0	AddCredit
+154	17.0	AddCredit
+155	16.0	AddCredit
+156	11.0	AddCredit
+157	14.0	AddCredit
+158	14.0	AddCredit
+159	13.0	AddCredit
+160	14.0	AddCredit
+161	12.0	AddCredit
+162	11.0	AddCredit
+163	10.0	AddCredit
+164	8.0	AddCredit
+165	10.0	AddCredit
+166	17.0	AddCredit
+167	10.0	AddCredit
+168	14.0	AddCredit
+169	17.0	AddCredit
+170	13.0	AddCredit
+171	15.0	AddCredit
+172	8.0	AddCredit
+173	15.0	AddCredit
+174	16.0	AddCredit
+175	12.0	AddCredit
+176	11.0	AddCredit
+177	12.0	AddCredit
+178	13.0	AddCredit
+179	9.0	AddCredit
+180	11.0	AddCredit
+181	7.0	AddCredit
+182	20.0	AddCredit
+183	14.0	AddCredit
+184	21.0	AddCredit
+185	15.0	AddCredit
+186	17.0	AddCredit
+187	13.0	AddCredit
+188	8.0	AddCredit
+189	8.0	AddCredit
+190	18.0	AddCredit
+191	17.0	AddCredit
+192	10.0	AddCredit
+193	10.0	AddCredit
+194	14.0	AddCredit
+195	12.0	AddCredit
+196	17.0	AddCredit
+197	15.0	AddCredit
+198	15.0	AddCredit
+199	14.0	AddCredit
+200	16.0	AddCredit
+201	13.0	AddCredit
+202	10.0	AddCredit
+203	15.0	AddCredit
+204	12.0	AddCredit
+205	10.0	AddCredit
+206	9.0	AddCredit
+207	16.0	AddCredit
+208	9.0	AddCredit
+209	7.0	AddCredit
+210	13.0	AddCredit
+211	18.0	AddCredit
+212	15.0	AddCredit
+213	18.0	AddCredit
+214	15.0	AddCredit
+215	18.0	AddCredit
+216	14.0	AddCredit
+217	10.0	AddCredit
+218	13.0	AddCredit
+219	14.0	AddCredit
+220	10.0	AddCredit
+221	11.0	AddCredit
+222	13.0	AddCredit
+223	9.0	AddCredit
+224	12.0	AddCredit
+225	6.0	AddCredit
+226	14.0	AddCredit
+227	15.0	AddCredit
+228	16.0	AddCredit
+229	9.0	AddCredit
+230	13.0	AddCredit
+231	13.0	AddCredit
+232	12.0	AddCredit
+233	14.0	AddCredit
+234	17.0	AddCredit
+235	8.0	AddCredit
+236	13.0	AddCredit
+237	19.0	AddCredit
+238	14.0	AddCredit
+239	16.0	AddCredit
+240	6.0	AddCredit
+241	12.0	AddCredit
+242	18.0	AddCredit
+243	10.0	AddCredit
+244	10.0	AddCredit
+245	11.0	AddCredit
+246	9.0	AddCredit
+247	12.0	AddCredit
+248	12.0	AddCredit
+>= 249	11066.0	AddCredit
+, UpdateSession= 
+ Reports=               0 Average=             NaN, Total=               0, 50%=               0, 95%=               0, 99%=               0, 99.5%=               0, 99.95%=               0, Max=               0
+, showCurrentAllocations=showCurrentAllocations 
+ Reports=              18 Average=              47, Total=             845, 50%=              49, 95%=              49, 99%=              49, 99.5%=              49, 99.95%=              49, Max=              40
+21	1.0	
+40	1.0	
+>= 49	16.0	
+, ReportQuotaUsage=ReportQuotaUsage 
+ Reports=           53336 Average=             230, Total=      12,264,577, 50%=             249, 95%=             249, 99%=             249, 99.5%=             249, 99.95%=             249, Max=             249
+0	4.0	
+1	40.0	
+2	28.0	
+3	31.0	
+4	35.0	
+5	39.0	
+6	43.0	
+7	42.0	
+8	46.0	
+9	31.0	
+10	24.0	
+11	38.0	
+12	28.0	
+13	29.0	
+14	25.0	
+15	20.0	
+16	25.0	
+17	25.0	
+18	17.0	
+19	23.0	
+20	19.0	
+21	17.0	
+22	7.0	
+23	14.0	
+24	11.0	
+25	15.0	
+26	19.0	
+27	16.0	
+28	18.0	
+29	20.0	
+30	20.0	
+31	16.0	
+32	17.0	
+33	15.0	
+34	19.0	
+35	14.0	
+36	15.0	
+37	15.0	
+38	13.0	
+39	20.0	
+40	24.0	
+41	25.0	
+42	24.0	
+43	17.0	
+44	25.0	
+45	15.0	
+46	17.0	
+47	26.0	
+48	21.0	
+49	23.0	
+50	20.0	
+51	17.0	
+52	19.0	
+53	22.0	
+54	16.0	
+55	20.0	
+56	31.0	
+57	32.0	
+58	26.0	
+59	33.0	
+60	18.0	
+61	30.0	
+62	21.0	
+63	36.0	
+64	32.0	
+65	24.0	
+66	22.0	
+67	25.0	
+68	29.0	
+69	37.0	
+70	32.0	
+71	26.0	
+72	38.0	
+73	30.0	
+74	40.0	
+75	24.0	
+76	32.0	
+77	37.0	
+78	39.0	
+79	43.0	
+80	32.0	
+81	38.0	
+82	35.0	
+83	20.0	
+84	43.0	
+85	38.0	
+86	32.0	
+87	43.0	
+88	47.0	
+89	36.0	
+90	34.0	
+91	40.0	
+92	36.0	
+93	45.0	
+94	30.0	
+95	36.0	
+96	46.0	
+97	42.0	
+98	46.0	
+99	48.0	
+100	54.0	
+101	37.0	
+102	52.0	
+103	37.0	
+104	44.0	
+105	36.0	
+106	33.0	
+107	37.0	
+108	43.0	
+109	37.0	
+110	39.0	
+111	41.0	
+112	41.0	
+113	44.0	
+114	40.0	
+115	41.0	
+116	58.0	
+117	43.0	
+118	41.0	
+119	40.0	
+120	33.0	
+121	42.0	
+122	40.0	
+123	44.0	
+124	35.0	
+125	46.0	
+126	45.0	
+127	39.0	
+128	41.0	
+129	49.0	
+130	43.0	
+131	33.0	
+132	42.0	
+133	38.0	
+134	30.0	
+135	29.0	
+136	48.0	
+137	45.0	
+138	45.0	
+139	46.0	
+140	44.0	
+141	35.0	
+142	33.0	
+143	38.0	
+144	48.0	
+145	56.0	
+146	52.0	
+147	33.0	
+148	40.0	
+149	48.0	
+150	52.0	
+151	44.0	
+152	40.0	
+153	36.0	
+154	63.0	
+155	49.0	
+156	45.0	
+157	49.0	
+158	50.0	
+159	51.0	
+160	37.0	
+161	40.0	
+162	37.0	
+163	38.0	
+164	45.0	
+165	52.0	
+166	40.0	
+167	49.0	
+168	52.0	
+169	37.0	
+170	43.0	
+171	39.0	
+172	56.0	
+173	53.0	
+174	46.0	
+175	45.0	
+176	46.0	
+177	54.0	
+178	49.0	
+179	33.0	
+180	33.0	
+181	46.0	
+182	56.0	
+183	52.0	
+184	47.0	
+185	39.0	
+186	31.0	
+187	43.0	
+188	37.0	
+189	41.0	
+190	57.0	
+191	40.0	
+192	37.0	
+193	51.0	
+194	35.0	
+195	47.0	
+196	42.0	
+197	45.0	
+198	46.0	
+199	46.0	
+200	38.0	
+201	48.0	
+202	39.0	
+203	51.0	
+204	72.0	
+205	43.0	
+206	44.0	
+207	43.0	
+208	40.0	
+209	39.0	
+210	53.0	
+211	29.0	
+212	41.0	
+213	41.0	
+214	43.0	
+215	45.0	
+216	46.0	
+217	29.0	
+218	45.0	
+219	53.0	
+220	39.0	
+221	38.0	
+222	51.0	
+223	42.0	
+224	51.0	
+225	48.0	
+226	54.0	
+227	44.0	
+228	55.0	
+229	37.0	
+230	42.0	
+231	50.0	
+232	50.0	
+233	51.0	
+234	54.0	
+235	43.0	
+236	58.0	
+237	44.0	
+238	54.0	
+239	55.0	
+240	47.0	
+241	40.0	
+242	45.0	
+243	48.0	
+244	35.0	
+245	39.0	
+246	58.0	
+247	55.0	
+248	49.0	
+>= 249	44011.0	
+, getTotalBalance=getTotalBalance 
+ Reports=              18 Average=              43, Total=             773, 50%=              49, 95%=              49, 99%=              49, 99.5%=              49, 99.95%=              49, Max=              49
+18	1.0	
+23	2.0	
+36	1.0	
+39	1.0	
+46	1.0	
+>= 49	12.0	
+, GetUser=GetUser 
+ Reports=              18 Average=              46, Total=             828, 50%=              49, 95%=              49, 99%=              49, 99.5%=              49, 99.95%=              49, Max=              43
+18	1.0	
+32	1.0	
+43	1.0	
+>= 49	15.0	
+}
+{}
+{}

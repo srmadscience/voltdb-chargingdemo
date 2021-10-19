@@ -29,56 +29,61 @@ import org.voltdb.client.ProcedureCallback;
 
 public class UpdateSessionStateCallback implements ProcedureCallback {
 
-  UserState[] state = null;
-  int offset = 0;
+    UserState[] state = null;
+    int offset = 0;
 
-  public UpdateSessionStateCallback(UserState[] state, int offset) {
-    super();
-    this.state = state;
-    this.offset = offset;
-  }
-
-  public void clientCallback(ClientResponse arg0) throws Exception {
-    if (arg0.getStatus() != ClientResponse.SUCCESS) {
-      ChargingDemo.msg("Error Code " + arg0.getStatusString());
-    } else {
-
-      // Find id. It'll be in the  last VoltTable..
-      VoltTable balanceTable = arg0.getResults()[arg0.getResults().length - 1];
-
-      // Find allocation . It'll be in the  last VoltTable -2
-      VoltTable allocationTable = arg0.getResults()[arg0.getResults().length - 3];
-
-      if (balanceTable.advanceRow()) {
-        
-        int userid = (int) balanceTable.getLong("userid");
-        long balance = balanceTable.getLong("balance");
-        long sessionid = balanceTable.getLong("session_id");
-        int productid = (int) balanceTable.getLong("product_id");
-                long allocated = 0;
-        
-        try {
-          if (allocationTable.advanceRow()) {
-          allocated  = allocationTable.getLong("allocated_units"); }
-        } catch (Exception e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-        
-        synchronized (state) {
-          state[userid - offset].reportBalance(balance);
-          state[userid - offset].reportEndTransaction(productid, sessionid, arg0.getStatus(),allocated);
-        }
-
-
-      } else {
-        
-          ChargingDemo.msg("Balance info not found " + balanceTable.toFormattedString());
-        
-      }
-
+    public UpdateSessionStateCallback(UserState[] state, int offset) {
+        super();
+        this.state = state;
+        this.offset = offset;
     }
 
-  }
+    public void clientCallback(ClientResponse arg0) throws Exception {
+        if (arg0.getStatus() != ClientResponse.SUCCESS) {
+            ChargingDemo.msg("Error Code " + arg0.getStatusString());
+        } else {
+
+            // Find allocation . It'll be in the last VoltTable
+            VoltTable allocationTable = arg0.getResults()[arg0.getResults().length - 3];
+
+            // Find id. It'll be in the last VoltTable -1
+            VoltTable balanceTable = arg0.getResults()[arg0.getResults().length - 1];
+
+            if (balanceTable.advanceRow()) {
+
+                try {
+                    int userid = (int) balanceTable.getLong("userid");
+                    long balance = balanceTable.getLong("balance");
+                    long sessionid = balanceTable.getLong("session_id");
+                    int productid = (int) balanceTable.getLong("product_id");
+                    long allocated = 0;
+
+                    try {
+                        if (allocationTable.advanceRow()) {
+                            allocated = allocationTable.getLong("allocated_units");
+                        }
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                    synchronized (state) {
+                        state[userid - offset].reportBalance(balance);
+                        state[userid - offset].reportEndTransaction(productid, sessionid, arg0.getStatus(), allocated);
+                    }
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            } else {
+
+                ChargingDemo.msg("Balance info not found " + balanceTable.toFormattedString());
+
+            }
+
+        }
+
+    }
 
 }

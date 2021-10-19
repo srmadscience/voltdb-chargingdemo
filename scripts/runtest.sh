@@ -115,7 +115,8 @@ do
  	NETWORK=`cat ${LFILE}.lst | grep ens5 | awk '{ print $2, ":", $4 }' | tail -1`
 
 	# Get AWS instance type (if on AWS)
-  	ITYPE=`curl http://169.254.169.254/latest/meta-data/instance-type`
+  	#ITYPE=`curl http://169.254.169.254/latest/meta-data/instance-type`
+  	ITYPE=MAC
 
 	# Remote CPU
 	REMOTECPU=`cat remotecpu.txt`

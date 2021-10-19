@@ -38,6 +38,9 @@ CREATE INDEX urt_del_idx ON user_recent_transactions(userid, txn_time);
 
 CREATE INDEX urt_del_idx2 ON user_recent_transactions(txn_time);
 
+CREATE INDEX urt_del_idx3 ON user_recent_transactions(txn_time) WHERE NOT MIGRATING();
+
+
 DR table user_recent_transactions;
 
 CREATE STREAM user_financial_events 

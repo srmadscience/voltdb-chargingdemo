@@ -1,0 +1,680 @@
+java -jar ../jars/voltdb-chargingdemo-client.jar localhost 100000 0 7 TRANSACTIONS 10 180 10 100000 5
+2020-10-28 15:42:16:Parameters:[localhost, 100000, 0, 7, TRANSACTIONS, 10, 180, 10, 100000, 5]
+2020-10-28 15:42:16:Logging into VoltDB
+2020-10-28 15:42:16:Connect to localhost...
+2020-10-28 15:42:16:Transaction 1
+2020-10-28 15:42:16:Query user #42...
+2020-10-28 15:42:16:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:42:16:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          27   101437
+
+2020-10-28 15:42:16:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID  LASTDATE 
+------- ---------- ---------------- ---------- ---------
+
+2020-10-28 15:42:16:
+USER_TXN_ID  TXN_TIME                    PRODUCTID  AMOUNT 
+------------ --------------------------- ---------- -------
+Create_42    2020-10-28 15:22:57.625000        NULL  100000
+
+2020-10-28 15:42:16:
+USERID  BALANCE 
+------- --------
+
+2020-10-28 15:42:16:Show amount of credit currently reserved for products...
+2020-10-28 15:42:16:
+PRODUCTID  PRODUCTNAME                ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- -------------------------- ---------------- --------------
+         4 Domestic calls per minute                97            291
+
+2020-10-28 15:42:16:Show total credit held by system...
+2020-10-28 15:42:16:
+BALANCE     
+------------
+ 96634904859
+
+2020-10-28 15:42:26:Query user #42...
+2020-10-28 15:42:26:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:42:26:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          27   101437
+
+2020-10-28 15:42:26:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID  LASTDATE 
+------- ---------- ---------------- ---------- ---------
+
+2020-10-28 15:42:26:
+USER_TXN_ID  TXN_TIME                    PRODUCTID  AMOUNT 
+------------ --------------------------- ---------- -------
+Create_42    2020-10-28 15:22:57.625000        NULL  100000
+
+2020-10-28 15:42:26:
+USERID  BALANCE 
+------- --------
+
+2020-10-28 15:42:26:Show amount of credit currently reserved for products...
+2020-10-28 15:42:26:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             1019887              0
+         1 SMS messages                             1028461        1028461
+         2 Domestic Internet Access per GB          1017622       20352440
+         3 Roaming Internet Access per GB           1009491      345245922
+         4 Domestic calls per minute                1021151        3063453
+
+2020-10-28 15:42:26:Show total credit held by system...
+2020-10-28 15:42:26:
+BALANCE     
+------------
+ 96627221166
+
+2020-10-28 15:42:30:Transaction 100001
+2020-10-28 15:42:36:Query user #42...
+2020-10-28 15:42:36:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:42:36:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          27   101437
+
+2020-10-28 15:42:36:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               53  3395323888635215875 2020-10-28 15:42:28.559000 
+
+2020-10-28 15:42:36:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-10-28 15:22:57.625000        NULL  100000
+ReportQuotaUsage_1_83801_0_2  2020-10-28 15:42:28.559000           2       0
+
+2020-10-28 15:42:36:
+USERID  BALANCE 
+------- --------
+     42   100377
+
+2020-10-28 15:42:36:Show amount of credit currently reserved for products...
+2020-10-28 15:42:36:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             2048693              0
+         1 SMS messages                             2048069        2048069
+         2 Domestic Internet Access per GB          2031238       40624760
+         3 Roaming Internet Access per GB           2004123      685410066
+         4 Domestic calls per minute                2041722        6125166
+
+2020-10-28 15:42:36:Show total credit held by system...
+2020-10-28 15:42:36:
+BALANCE     
+------------
+ 96606129331
+
+2020-10-28 15:42:44:Transaction 200001
+2020-10-28 15:42:46:Query user #42...
+2020-10-28 15:42:46:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:42:46:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          27   101437
+
+2020-10-28 15:42:46:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               53  3395323888635215875 2020-10-28 15:42:28.559000 
+
+2020-10-28 15:42:46:
+USER_TXN_ID                   TXN_TIME                    PRODUCTID  AMOUNT 
+----------------------------- --------------------------- ---------- -------
+Create_42                     2020-10-28 15:22:57.625000        NULL  100000
+ReportQuotaUsage_1_83801_0_2  2020-10-28 15:42:28.559000           2       0
+
+2020-10-28 15:42:46:
+USERID  BALANCE 
+------- --------
+     42   100377
+
+2020-10-28 15:42:46:Show amount of credit currently reserved for products...
+2020-10-28 15:42:46:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             3014193              0
+         1 SMS messages                             3029080        3029080
+         2 Domestic Internet Access per GB          2997064       59941280
+         3 Roaming Internet Access per GB           2925141     1000398222
+         4 Domestic calls per minute                3018438        9055314
+
+2020-10-28 15:42:46:Show total credit held by system...
+2020-10-28 15:42:46:
+BALANCE     
+------------
+ 96576837767
+
+2020-10-28 15:42:56:Query user #42...
+2020-10-28 15:42:56:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:42:56:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          28   101389
+
+2020-10-28 15:42:56:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               53  3395323888635215875 2020-10-28 15:42:28.559000 
+     42          4               81                   68 2020-10-28 15:42:52.286000 
+     42          4               68  3395324039042957315 2020-10-28 15:42:46.489000 
+
+2020-10-28 15:42:56:
+USER_TXN_ID                     TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------- --------------------------- ---------- -------
+Create_42                       2020-10-28 15:22:57.625000        NULL  100000
+ReportQuotaUsage_1_83801_0_2    2020-10-28 15:42:28.559000           2       0
+ReportQuotaUsage_2_211116_0_4   2020-10-28 15:42:46.489000           4       0
+ReportQuotaUsage_3_251771_16_4  2020-10-28 15:42:52.286000           4     -48
+
+2020-10-28 15:42:56:
+USERID  BALANCE 
+------- --------
+     42    99882
+
+2020-10-28 15:42:56:Show amount of credit currently reserved for products...
+2020-10-28 15:42:56:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             3904028              0
+         1 SMS messages                             3919997        3919997
+         2 Domestic Internet Access per GB          3874988       77499760
+         3 Roaming Internet Access per GB           3757988     1285231896
+         4 Domestic calls per minute                3889178       11667534
+
+2020-10-28 15:42:56:Show total credit held by system...
+2020-10-28 15:42:56:
+BALANCE     
+------------
+ 96541923579
+
+2020-10-28 15:42:59:Transaction 300001
+2020-10-28 15:43:06:Query user #42...
+2020-10-28 15:43:06:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:43:06:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          28   101389
+
+2020-10-28 15:43:06:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               53  3395323888635215875 2020-10-28 15:42:28.559000 
+     42          3               87  3395324124422225923 2020-10-28 15:42:56.667000 
+     42          4               81                   68 2020-10-28 15:42:52.286000 
+     42          4               68  3395324039042957315 2020-10-28 15:42:46.489000 
+
+2020-10-28 15:43:06:
+USER_TXN_ID                     TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------- --------------------------- ---------- -------
+Create_42                       2020-10-28 15:22:57.625000        NULL  100000
+ReportQuotaUsage_1_83801_0_2    2020-10-28 15:42:28.559000           2       0
+ReportQuotaUsage_2_211116_0_4   2020-10-28 15:42:46.489000           4       0
+ReportQuotaUsage_3_251771_16_4  2020-10-28 15:42:52.286000           4     -48
+ReportQuotaUsage_4_282095_0_3   2020-10-28 15:42:56.667000           3       0
+
+2020-10-28 15:43:06:
+USERID  BALANCE 
+------- --------
+     42    70128
+
+2020-10-28 15:43:06:Show amount of credit currently reserved for products...
+2020-10-28 15:43:06:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             4729067              0
+         1 SMS messages                             4751997        4751997
+         2 Domestic Internet Access per GB          4677356       93547120
+         3 Roaming Internet Access per GB           4498029     1538325918
+         4 Domestic calls per minute                4709566       14128698
+
+2020-10-28 15:43:06:Show total credit held by system...
+2020-10-28 15:43:06:
+BALANCE     
+------------
+ 96502859229
+
+2020-10-28 15:43:13:Transaction 400001
+2020-10-28 15:43:16:Query user #42...
+2020-10-28 15:43:16:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:43:16:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          28   101389
+
+2020-10-28 15:43:16:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               53  3395323888635215875 2020-10-28 15:42:28.559000 
+     42          3               87  3395324124422225923 2020-10-28 15:42:56.667000 
+     42          4               81                   68 2020-10-28 15:42:52.286000 
+     42          4               68  3395324039042957315 2020-10-28 15:42:46.489000 
+
+2020-10-28 15:43:16:
+USER_TXN_ID                     TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------- --------------------------- ---------- -------
+Create_42                       2020-10-28 15:22:57.625000        NULL  100000
+ReportQuotaUsage_1_83801_0_2    2020-10-28 15:42:28.559000           2       0
+ReportQuotaUsage_2_211116_0_4   2020-10-28 15:42:46.489000           4       0
+ReportQuotaUsage_3_251771_16_4  2020-10-28 15:42:52.286000           4     -48
+ReportQuotaUsage_4_282095_0_3   2020-10-28 15:42:56.667000           3       0
+
+2020-10-28 15:43:16:
+USERID  BALANCE 
+------- --------
+     42    70128
+
+2020-10-28 15:43:16:Show amount of credit currently reserved for products...
+2020-10-28 15:43:16:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             5519972              0
+         1 SMS messages                             5543224        5543224
+         2 Domestic Internet Access per GB          5441253      108825060
+         3 Roaming Internet Access per GB           5186535     1773794970
+         4 Domestic calls per minute                5500207       16500621
+
+2020-10-28 15:43:16:Show total credit held by system...
+2020-10-28 15:43:16:
+BALANCE     
+------------
+ 96459911286
+
+2020-10-28 15:43:26:Query user #42...
+2020-10-28 15:43:26:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:43:26:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          29   101710
+
+2020-10-28 15:43:26:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               53  3395323888635215875 2020-10-28 15:42:28.559000 
+     42          3               87  3395324124422225923 2020-10-28 15:42:56.667000 
+     42          4               81                   68 2020-10-28 15:42:52.286000 
+     42          4               68  3395324039042957315 2020-10-28 15:42:46.489000 
+
+2020-10-28 15:43:26:
+USER_TXN_ID                     TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------- --------------------------- ---------- -------
+Create_42                       2020-10-28 15:22:57.625000        NULL  100000
+ReportQuotaUsage_1_83801_0_2    2020-10-28 15:42:28.559000           2       0
+ReportQuotaUsage_2_211116_0_4   2020-10-28 15:42:46.489000           4       0
+ReportQuotaUsage_3_251771_16_4  2020-10-28 15:42:52.286000           4     -48
+ReportQuotaUsage_4_282095_0_3   2020-10-28 15:42:56.667000           3       0
+AddCreditAtInterval_5_454305_321 2020-10-28 15:43:21.478000        NULL     321
+
+2020-10-28 15:43:26:
+USERID  BALANCE 
+------- --------
+     42    70449
+
+2020-10-28 15:43:26:Show amount of credit currently reserved for products...
+2020-10-28 15:43:26:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             6309165              0
+         1 SMS messages                             6308584        6308584
+         2 Domestic Internet Access per GB          6189318      123786360
+         3 Roaming Internet Access per GB           5837478     1996417476
+         4 Domestic calls per minute                6263016       18789048
+
+2020-10-28 15:43:26:Show total credit held by system...
+2020-10-28 15:43:26:
+BALANCE     
+------------
+ 96412998411
+
+2020-10-28 15:43:28:Transaction 500001
+2020-10-28 15:43:36:Query user #42...
+2020-10-28 15:43:36:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:43:36:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          30    95896
+
+2020-10-28 15:43:36:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               53  3395323888635215875 2020-10-28 15:42:28.559000 
+     42          3               88                   87 2020-10-28 15:43:33.709000 
+     42          3               87  3395324124422225923 2020-10-28 15:42:56.667000 
+     42          4               81                   68 2020-10-28 15:42:52.286000 
+     42          4               68  3395324039042957315 2020-10-28 15:42:46.489000 
+
+2020-10-28 15:43:36:
+USER_TXN_ID                     TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------- --------------------------- ---------- -------
+Create_42                       2020-10-28 15:22:57.625000        NULL  100000
+ReportQuotaUsage_1_83801_0_2    2020-10-28 15:42:28.559000           2       0
+ReportQuotaUsage_2_211116_0_4   2020-10-28 15:42:46.489000           4       0
+ReportQuotaUsage_3_251771_16_4  2020-10-28 15:42:52.286000           4     -48
+ReportQuotaUsage_4_282095_0_3   2020-10-28 15:42:56.667000           3       0
+AddCreditAtInterval_5_454305_321 2020-10-28 15:43:21.478000        NULL     321
+ReportQuotaUsage_6_539357_17_3  2020-10-28 15:43:33.709000           3   -5814
+
+2020-10-28 15:43:36:
+USERID  BALANCE 
+------- --------
+     42    34539
+
+2020-10-28 15:43:36:Show amount of credit currently reserved for products...
+2020-10-28 15:43:36:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             7074343              0
+         1 SMS messages                             7064271        7064271
+         2 Domestic Internet Access per GB          6910029      138200580
+         3 Roaming Internet Access per GB           6464291     2210787522
+         4 Domestic calls per minute                7019389       21058167
+
+2020-10-28 15:43:36:Show total credit held by system...
+2020-10-28 15:43:36:
+BALANCE     
+------------
+ 96361743146
+
+2020-10-28 15:43:42:Transaction 600001
+2020-10-28 15:43:46:Query user #42...
+2020-10-28 15:43:46:
+USERID  USER_JSON_OBJECT  USER_LAST_SEEN              USER_SOFTLOCK_SESSIONID  USER_SOFTLOCK_EXPIRY 
+------- ----------------- --------------------------- ------------------------ ---------------------
+     42 { "payload":"" }  2020-10-28 15:22:57.617000                      NULL NULL                 
+
+2020-10-28 15:43:46:
+USERID  TRAN_COUNT  BALANCE 
+------- ----------- --------
+     42          30    95896
+
+2020-10-28 15:43:46:
+USERID  PRODUCTID  ALLOCATED_UNITS  SESSIONID            LASTDATE                   
+------- ---------- ---------------- -------------------- ---------------------------
+     42          2               53  3395323888635215875 2020-10-28 15:42:28.559000 
+     42          3               88                   87 2020-10-28 15:43:33.709000 
+     42          3               87  3395324124422225923 2020-10-28 15:42:56.667000 
+     42          4               81                   68 2020-10-28 15:42:52.286000 
+     42          4               68  3395324039042957315 2020-10-28 15:42:46.489000 
+
+2020-10-28 15:43:46:
+USER_TXN_ID                     TXN_TIME                    PRODUCTID  AMOUNT 
+------------------------------- --------------------------- ---------- -------
+Create_42                       2020-10-28 15:22:57.625000        NULL  100000
+ReportQuotaUsage_1_83801_0_2    2020-10-28 15:42:28.559000           2       0
+ReportQuotaUsage_2_211116_0_4   2020-10-28 15:42:46.489000           4       0
+ReportQuotaUsage_3_251771_16_4  2020-10-28 15:42:52.286000           4     -48
+ReportQuotaUsage_4_282095_0_3   2020-10-28 15:42:56.667000           3       0
+AddCreditAtInterval_5_454305_321 2020-10-28 15:43:21.478000        NULL     321
+ReportQuotaUsage_6_539357_17_3  2020-10-28 15:43:33.709000           3   -5814
+
+2020-10-28 15:43:46:
+USERID  BALANCE 
+------- --------
+     42    34539
+
+2020-10-28 15:43:46:Show amount of credit currently reserved for products...
+2020-10-28 15:43:46:
+PRODUCTID  PRODUCTNAME                     ALLOCATED_UNITS  VALUE_AT_RISK 
+---------- ------------------------------- ---------------- --------------
+         0 Our Web Site                             7844758              0
+         1 SMS messages                             7819186        7819186
+         2 Domestic Internet Access per GB          7612479      152249580
+         3 Roaming Internet Access per GB           7069734     2417849028
+         4 Domestic calls per minute                7755031       23265093
+
+2020-10-28 15:43:46:Show total credit held by system...
+2020-10-28 15:43:46:
+BALANCE     
+------------
+ 96307313889
+
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:No connections.
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received
+2020-10-28 15:43:50:Error Code Connection to database host (localhost/127.0.0.1:21212) was lost before a response was received

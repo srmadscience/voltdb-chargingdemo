@@ -1,5 +1,7 @@
 package chargingdemoprocs;
 
+import java.util.Date;
+
 /* This file is part of VoltDB.
  * Copyright (C) 2008-2018 VoltDB Inc.
  *
@@ -26,6 +28,7 @@ package chargingdemoprocs;
 import org.voltdb.SQLStmt;
 import org.voltdb.VoltProcedure;
 import org.voltdb.VoltTable;
+import org.voltdb.types.TimestampType;
 
 public class ReportQuotaUsage extends VoltProcedure {
 
@@ -34,9 +37,7 @@ public class ReportQuotaUsage extends VoltProcedure {
     public static final SQLStmt getUser = new SQLStmt("SELECT userid FROM user_table WHERE userid = ?;");
     
     public static final SQLStmt getTxn = new SQLStmt("SELECT txn_time FROM user_recent_transactions WHERE userid = ? AND user_txn_id = ?;");
-    
-    public static final SQLStmt deleteOldTxns = new SQLStmt("DELETE FROM user_recent_transactions WHERE userid = ? AND txn_time < DATEADD(HOUR,?,NOW);");
-    
+       
     public static final SQLStmt addTxn = new SQLStmt("INSERT INTO user_recent_transactions (userid, user_txn_id, txn_time, productid, amount) VALUES (?,?,NOW,?,?);");
 
     public static final SQLStmt getBalance = new SQLStmt("SELECT balance, CAST (? AS BIGINT) product_id,"
@@ -63,18 +64,25 @@ public class ReportQuotaUsage extends VoltProcedure {
 
     public static final SQLStmt deleteAllocation = new SQLStmt("DELETE FROM user_usage_table WHERE userid = ? AND productid = ? AND sessionid = ?");
     
-    public static final SQLStmt deleteStaleAllocation = new SQLStmt("DELETE FROM user_usage_table "
-        + "WHERE userid = ? AND lastdate < DATEADD(MILLISECOND,?,NOW)");
-    
     public static final SQLStmt reportSpending = new SQLStmt(
             "INSERT INTO user_financial_events (userid   ,amount, purpose)    VALUES (?,?,?);");
   
     public static final SQLStmt updBalance = new SQLStmt(
         "upsert into user_balances select userid, tran_count, balance from user_balance_total_view where userid = ?;");
 
+    public static final SQLStmt getOldestTxn = new SQLStmt("SELECT user_txn_id, txn_time "
+            + "FROM user_recent_transactions "
+            + "WHERE userid = ? "
+            + "ORDER BY txn_time,userid,user_txn_id LIMIT 1;");
+
+    public static final SQLStmt deleteOldTxn = new SQLStmt("DELETE FROM user_recent_transactions "
+            + "WHERE userid = ? AND user_txn_id = ?;");
+
+  
     private static final long TIMEOUT_MS = 600000;
     
-    private static final long DELETE_TRANSACTION_HOURS = 4;
+    private static final long FIVE_MINUTES_IN_MS = 1000 * 60 * 5;
+
     
     // @formatter:on
 
@@ -92,6 +100,7 @@ public class ReportQuotaUsage extends VoltProcedure {
     voltQueueSQL(getUser, userId);
     voltQueueSQL(getProduct, productId);
     voltQueueSQL(getTxn, userId, txnId);
+    voltQueueSQL(getOldestTxn, userId);
 
     VoltTable[] results = voltExecuteSQL();
 
@@ -113,20 +122,15 @@ public class ReportQuotaUsage extends VoltProcedure {
       this.setAppStatusString("Event already happened at " + results[2].getTimestampAsTimestamp("txn_time").toString());
       return voltExecuteSQL(true);
     }
+    
+ 
+    
 
     long amountSpent = unitsUsed * unitCost * -1;
 
     if (unitsUsed > 0) {
 
-      // Housekeeping: Delete allocations for this user that are older than
-      // TIMEOUT_MS
-      voltQueueSQL(deleteStaleAllocation, userId, -1 * TIMEOUT_MS);
-
-      // Housekeeping: Delete old transactions for this user that are older than
-      // DELETE_TRANSACTION_HOURS
-      voltQueueSQL(deleteOldTxns, userId, -1 * DELETE_TRANSACTION_HOURS);
-
-      // Report spending...
+       // Report spending...
       voltQueueSQL(reportSpending, userId, amountSpent, unitsUsed + " units of product " + productId);
       voltQueueSQL(updBalance, userId);
 
@@ -140,19 +144,19 @@ public class ReportQuotaUsage extends VoltProcedure {
     // Note that transaction is now 'official'
     voltQueueSQL(addTxn, userId, txnId, productId, amountSpent);
 
-    // get credit so we can see what we can spend...
+    voltQueueSQL(getCurrentAllocation, userId, productId, sessionId);   
     voltQueueSQL(getRemainingCredit, userId);
     voltQueueSQL(getBalance, productId, sessionId, userId);
 
     final VoltTable[] interimResults = voltExecuteSQL();
 
     // Check the balance...
-    interimResults[3].advanceRow();
-    currentBalance = interimResults[3].getLong("BALANCE");
+    interimResults[4].advanceRow();
+    currentBalance = interimResults[4].getLong("BALANCE");
 
     // If we have any reservations use them instead.
-    if (interimResults[2].advanceRow()) {
-      currentBalance = interimResults[2].getLong("BALANCE");
+    if (interimResults[3].advanceRow()) {
+      currentBalance = interimResults[3].getLong("BALANCE");
     }
 
     // if unitsWanted is 0 or less then this transaction is finished...
@@ -188,6 +192,17 @@ public class ReportQuotaUsage extends VoltProcedure {
       voltQueueSQL(createAllocation, userId, productId, unitsWanted, sessionId);
 
     }
+
+    // Delete oldest record if old enough
+    if (results[3].advanceRow()) {
+        TimestampType oldestTxn = results[3].getTimestampAsTimestamp("txn_time");
+        
+        if (oldestTxn.asExactJavaDate().before(new Date(getTransactionTime().getTime() - FIVE_MINUTES_IN_MS))) {
+            String oldestTxnId = results[3].getString("user_txn_id");
+            voltQueueSQL(deleteOldTxn, userId, oldestTxnId);
+        }
+     }
+
 
     voltQueueSQL(getCurrentAllocation, userId, productId, sessionId);
     voltQueueSQL(getRemainingCredit, userId);

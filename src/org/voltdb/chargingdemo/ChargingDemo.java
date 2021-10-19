@@ -318,7 +318,8 @@ public class ChargingDemo {
           }
 
           if (tranCount % 100000 == 1) {
-            msg("Transaction " + tranCount);
+            msg("Transaction " + tranCount + ", in flight transactions seen="+inFlightCount);
+            inFlightCount=0;
 
           }
 

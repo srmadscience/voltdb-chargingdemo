@@ -1,0 +1,1589 @@
+Script started on Wed Aug 26 11:04:06 2020
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+[?1034hbash-3.2$ sh -x reproduce.sh 
++ STARTTPS=10
++ INCTPS=1
++ STOPTPS=21
++ DURATIONSECONDS=180
++ INITIALCREDIT=100000
++ CREDITINTERVAL=5
++ TCOUNT=10
++ HNAME=192.168.0.20
++ USERCOUNT=100000
++ THISTPS=10
++ cd ../ddl
++ sqlcmd --servers=192.168.0.20
+
+load classes ../jars/voltdb-chargingdemo.jar;
+Command succeeded.
+
+FILE -inlinebatch END_OF_BATCH
+
+
+CREATE table product_table
+(productid bigint not null primary key
+,productname varchar(50) not null
+,unit_cost bigint not null);
+
+DR TABLE product_table;
+
+CREATE table user_table
+(userid bigint not null primary key
+,user_json_object varchar(8000)
+,user_last_seen TIMESTAMP DEFAULT NOW
+,user_softlock_sessionid bigint 
+,user_softlock_expiry TIMESTAMP);
+
+create index ut_del on user_table(user_last_seen);
+
+PARTITION TABLE user_table ON COLUMN userid;
+
+DR table user_table;
+
+create table user_recent_transactions
+ MIGRATE TO TARGET user_transactions
+(userid bigint not null 
+,user_txn_id varchar(128)
+,txn_time TIMESTAMP DEFAULT NOW  not null 
+,productid bigint
+,amount bigint 
+,primary key (userid, user_txn_id))
+USING TTL 1 HOURS ON COLUMN txn_time;
+
+PARTITION TABLE user_recent_transactions ON COLUMN userid;
+
+CREATE INDEX urt_del_idx ON user_recent_transactions(userid, txn_time);
+
+CREATE INDEX urt_del_idx2 ON user_recent_transactions(txn_time);
+
+CREATE INDEX urt_del_idx3 ON user_recent_transactions(txn_time) WHERE NOT MIGRATING();
+
+
+DR table user_recent_transactions;
+
+CREATE STREAM user_financial_events 
+partition on column userid
+export to target finevent
+(userid bigint not null 
+,amount bigint not null
+,purpose varchar(80) not null);
+
+create table user_usage_table
+ MIGRATE TO TARGET user_usage_table_stale_entries
+(userid bigint not null
+,productid bigint not null
+,allocated_units bigint not null
+,sessionid bigint  not null
+,lastdate timestamp not null
+,primary key (userid, productid,sessionid));
+
+CREATE INDEX uut_del_idx ON user_usage_table(lastdate,userid, productid,sessionid);
+
+CREATE INDEX uut_del_idx2 ON user_usage_table(userid, lastdate,productid,sessionid);
+
+PARTITION TABLE user_usage_table ON COLUMN userid;
+
+DR table user_usage_table;
+
+create view allocated_by_product
+as
+select productid, count(*) how_many, sum(allocated_units) allocated_units
+from user_usage_table
+group by productid;
+
+create view user_balance_total_view
+as
+select userid, count(*) tran_count, sum(amount) balance
+from user_financial_events
+group by userid;
+
+create table user_balances
+(userid bigint not null  primary key
+,tran_count bigint not null
+,balance bigint not null);
+
+PARTITION TABLE user_balances ON COLUMN userid;
+
+DR TABLE user_balances;
+
+CREATE VIEW total_balances AS
+SELECT sum(balance) balance 
+FROM user_balances;
+
+CREATE PROCEDURE getTotalBalance AS
+SELECT * FROM total_balances;
+
+CREATE PROCEDURE checkBalance
+PARTITION ON TABLE user_table COLUMN userid
+as
+select v.userid, v.balance - sum(uut.allocated_units * p.unit_cost )  credit
+from  user_balances v 
+   , user_usage_table uut
+   , product_table p
+where v.userid = ?
+and   v.userid = uut.userid
+and   p.productid = uut.productid
+group by v.userid, v.balance;
+
+create procedure showTransactions
+PARTITION ON TABLE user_table COLUMN userid
+as 
+select * from user_recent_transactions where userid = ? ORDER BY txn_time, user_txn_id;
+
+CREATE PROCEDURE showCurrentAllocations AS
+select p.productid, p.productname, a.allocated_units, a.allocated_units * p.unit_cost value_at_risk
+from product_table p, allocated_by_product a
+where p.productid = a.productid
+order by p.productid;
+  
+CREATE PROCEDURE 
+   PARTITION ON TABLE user_table COLUMN userid
+   FROM CLASS chargingdemoprocs.GetUser;
+   
+CREATE PROCEDURE 
+   PARTITION ON TABLE user_table COLUMN userid
+   FROM CLASS chargingdemoprocs.GetAndLockUser;
+   
+CREATE PROCEDURE 
+   PARTITION ON TABLE user_table COLUMN userid
+   FROM CLASS chargingdemoprocs.UpdateLockedUser;
+   
+CREATE PROCEDURE 
+   PARTITION ON TABLE user_table COLUMN userid
+   FROM CLASS chargingdemoprocs.UpsertUser;
+   
+CREATE PROCEDURE 
+   PARTITION ON TABLE user_table COLUMN userid
+   FROM CLASS chargingdemoprocs.DelUser;
+   
+CREATE PROCEDURE 
+   PARTITION ON TABLE user_table COLUMN userid
+   FROM CLASS chargingdemoprocs.ReportQuotaUsage;  
+   
+CREATE PROCEDURE 
+   PARTITION ON TABLE user_table COLUMN userid
+   FROM CLASS chargingdemoprocs.AddCredit;  
+
+DROP TASK DeleteStaleAllocationsTask IF EXISTS;
+   
+DROP PROCEDURE DeleteStaleAllocations IF EXISTS;
+  
+CREATE PROCEDURE DIRECTED
+   FROM CLASS chargingdemoprocs.DeleteStaleAllocations;  
+   
+CREATE TASK DeleteStaleAllocationsTask
+ON SCHEDULE DELAY 1 SECONDS
+PROCEDURE DeleteStaleAllocations ON ERROR LOG
+RUN ON PARTITIONS;
+
+DROP TASK DeleteStaleAllocationsTask;
+
+DROP TASK PurgeWrangler IF EXISTS;
+
+CREATE TASK PurgeWrangler  FROM CLASS chargingdemotasks.PurgeWrangler WITH (10,30000) ON ERROR LOG RUN ON PARTITIONS DISABLE;
+
+
+
+Batch command succeeded.
+++ date +%Y%m%d%H%M
++ PFILE=202008261104perf.txt
+++ ps -deaf
+++ grep voltdb-chargingdemo-client.jar
+++ grep -v grep
+++ awk '{ print $2 }'
++ kill -9
+++ expr 100000 '*' 10
++ TOTAL_USERCOUNT=1000000
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 1000000 0 50 DELETE 10 600 10 100000 5
+2020-08-26 11:04:14:Parameters:[192.168.0.20, 1000000, 0, 50, DELETE, 10, 600, 10, 100000, 5]
+2020-08-26 11:04:14:Logging into VoltDB
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+2020-08-26 11:04:14:Connect to 192.168.0.20...
+2020-08-26 11:04:14:Deleted 1 users...
+2020-08-26 11:04:17:Deleted 100001 users...
+2020-08-26 11:04:19:Deleted 200001 users...
+2020-08-26 11:04:21:Deleted 300001 users...
+2020-08-26 11:04:24:Deleted 400001 users...
+2020-08-26 11:04:26:Deleted 500001 users...
+2020-08-26 11:04:28:Deleted 600001 users...
+2020-08-26 11:04:30:Deleted 700001 users...
+2020-08-26 11:04:33:Deleted 800001 users...
+2020-08-26 11:04:35:Deleted 900001 users...
+2020-08-26 11:04:37:All entries in queue, waiting for it to drain...
+2020-08-26 11:04:37:Deleted 43 users per ms...
+2020-08-26 11:04:37:Closing connection...
+2020-08-26 11:04:37:Stats Histogram:
+2020-08-26 11:04:37:{DelUser=DelUser 
+ Reports=         1000000 Average=              67, Total=      67,357,006, 50%=              67, 95%=              68, 99%=             249, 99.5%=             249, 99.95%=             249, Max=             249
+5	2.0	DelUser
+6	2.0	DelUser
+8	2.0	DelUser
+9	5.0	DelUser
+10	7.0	DelUser
+11	6.0	DelUser
+12	7.0	DelUser
+13	7.0	DelUser
+14	8.0	DelUser
+15	10.0	DelUser
+16	15.0	DelUser
+17	11.0	DelUser
+18	4.0	DelUser
+19	3.0	DelUser
+20	1.0	DelUser
+21	3.0	DelUser
+22	6.0	DelUser
+23	6.0	DelUser
+24	3.0	DelUser
+25	5.0	DelUser
+26	7.0	DelUser
+27	5.0	DelUser
+28	14.0	DelUser
+29	19.0	DelUser
+30	15.0	DelUser
+31	15.0	DelUser
+32	19.0	DelUser
+33	14.0	DelUser
+34	12.0	DelUser
+35	11.0	DelUser
+36	17.0	DelUser
+37	16.0	DelUser
+38	20.0	DelUser
+39	19.0	DelUser
+40	25.0	DelUser
+41	20.0	DelUser
+42	23.0	DelUser
+43	35.0	DelUser
+44	47.0	DelUser
+45	304.0	DelUser
+46	703.0	DelUser
+47	1820.0	DelUser
+48	3846.0	DelUser
+49	4034.0	DelUser
+50	2333.0	DelUser
+51	4045.0	DelUser
+52	4409.0	DelUser
+53	3407.0	DelUser
+54	2032.0	DelUser
+55	1861.0	DelUser
+56	2028.0	DelUser
+57	2467.0	DelUser
+58	2771.0	DelUser
+59	1932.0	DelUser
+60	2027.0	DelUser
+61	2584.0	DelUser
+62	5063.0	DelUser
+63	7825.0	DelUser
+64	12354.0	DelUser
+65	24831.0	DelUser
+66	56613.0	DelUser
+67	557998.0	DelUser
+68	259968.0	DelUser
+69	10289.0	DelUser
+70	2813.0	DelUser
+71	2154.0	DelUser
+72	1658.0	DelUser
+73	1478.0	DelUser
+74	1265.0	DelUser
+75	1070.0	DelUser
+76	1078.0	DelUser
+77	1026.0	DelUser
+78	1027.0	DelUser
+79	820.0	DelUser
+80	369.0	DelUser
+81	216.0	DelUser
+82	246.0	DelUser
+83	162.0	DelUser
+84	151.0	DelUser
+85	140.0	DelUser
+86	107.0	DelUser
+87	97.0	DelUser
+88	55.0	DelUser
+89	61.0	DelUser
+90	39.0	DelUser
+91	47.0	DelUser
+92	56.0	DelUser
+93	47.0	DelUser
+94	33.0	DelUser
+95	39.0	DelUser
+96	26.0	DelUser
+97	27.0	DelUser
+98	32.0	DelUser
+99	17.0	DelUser
+100	11.0	DelUser
+101	5.0	DelUser
+102	3.0	DelUser
+103	129.0	DelUser
+104	125.0	DelUser
+105	12.0	DelUser
+106	111.0	DelUser
+107	168.0	DelUser
+108	232.0	DelUser
+109	27.0	DelUser
+110	5.0	DelUser
+117	7.0	DelUser
+118	18.0	DelUser
+119	25.0	DelUser
+120	45.0	DelUser
+121	141.0	DelUser
+122	34.0	DelUser
+130	1.0	DelUser
+131	3.0	DelUser
+132	5.0	DelUser
+133	8.0	DelUser
+134	1.0	DelUser
+135	6.0	DelUser
+136	5.0	DelUser
+137	1.0	DelUser
+139	5.0	DelUser
+140	10.0	DelUser
+141	11.0	DelUser
+142	20.0	DelUser
+143	17.0	DelUser
+144	10.0	DelUser
+145	14.0	DelUser
+146	11.0	DelUser
+147	7.0	DelUser
+148	16.0	DelUser
+149	32.0	DelUser
+150	62.0	DelUser
+151	50.0	DelUser
+152	27.0	DelUser
+153	16.0	DelUser
+154	22.0	DelUser
+155	39.0	DelUser
+156	17.0	DelUser
+157	27.0	DelUser
+158	15.0	DelUser
+159	18.0	DelUser
+160	16.0	DelUser
+161	28.0	DelUser
+162	5.0	DelUser
+163	42.0	DelUser
+164	27.0	DelUser
+165	22.0	DelUser
+166	20.0	DelUser
+167	37.0	DelUser
+168	20.0	DelUser
+169	47.0	DelUser
+170	15.0	DelUser
+171	8.0	DelUser
+172	18.0	DelUser
+173	6.0	DelUser
+174	13.0	DelUser
+175	10.0	DelUser
+176	12.0	DelUser
+177	13.0	DelUser
+178	9.0	DelUser
+179	11.0	DelUser
+180	12.0	DelUser
+181	4.0	DelUser
+182	14.0	DelUser
+183	32.0	DelUser
+184	235.0	DelUser
+185	112.0	DelUser
+186	10.0	DelUser
+187	6.0	DelUser
+188	3.0	DelUser
+189	4.0	DelUser
+190	6.0	DelUser
+191	2.0	DelUser
+192	1.0	DelUser
+193	4.0	DelUser
+194	3.0	DelUser
+195	9.0	DelUser
+196	6.0	DelUser
+197	3.0	DelUser
+198	4.0	DelUser
+199	1.0	DelUser
+200	3.0	DelUser
+201	2.0	DelUser
+202	124.0	DelUser
+203	77.0	DelUser
+204	3.0	DelUser
+226	11.0	DelUser
+227	7.0	DelUser
+228	13.0	DelUser
+229	8.0	DelUser
+230	7.0	DelUser
+231	5.0	DelUser
+233	5.0	DelUser
+234	10.0	DelUser
+236	8.0	DelUser
+237	2.0	DelUser
+238	8.0	DelUser
+239	13.0	DelUser
+240	5.0	DelUser
+241	18.0	DelUser
+242	2.0	DelUser
+243	6.0	DelUser
+245	4.0	DelUser
+246	16.0	DelUser
+247	21.0	DelUser
+248	25.0	DelUser
+>= 249	2807.0	DelUser
+}
+{}
+{}
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 1000000 0 50 USERS 10 600 10 100000 5
+2020-08-26 11:04:37:Parameters:[192.168.0.20, 1000000, 0, 50, USERS, 10, 600, 10, 100000, 5]
+2020-08-26 11:04:37:Logging into VoltDB
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+2020-08-26 11:04:37:Connect to 192.168.0.20...
+2020-08-26 11:04:38:Upserted 1 users...
+2020-08-26 11:04:40:Upserted 100001 users...
+2020-08-26 11:04:42:Upserted 200001 users...
+2020-08-26 11:04:45:Upserted 300001 users...
+2020-08-26 11:04:47:Upserted 400001 users...
+2020-08-26 11:04:49:Upserted 500001 users...
+2020-08-26 11:04:52:Upserted 600001 users...
+2020-08-26 11:04:54:Upserted 700001 users...
+2020-08-26 11:04:56:Upserted 800001 users...
+2020-08-26 11:04:58:Upserted 900001 users...
+2020-08-26 11:05:01:All entries in queue, waiting for it to drain...
+2020-08-26 11:05:01:Upserted 43 users per ms...
+2020-08-26 11:05:01:Closing connection...
+2020-08-26 11:05:01:Stats Histogram:
+2020-08-26 11:05:01:{UpsertUser=UpsertUser 
+ Reports=         1000000 Average=              68, Total=      68,322,214, 50%=              69, 95%=              72, 99%=              85, 99.5%=              95, 99.95%=             121, Max=             133
+0	4.0	UpsertUser
+1	478.0	UpsertUser
+2	557.0	UpsertUser
+3	268.0	UpsertUser
+4	151.0	UpsertUser
+5	103.0	UpsertUser
+6	104.0	UpsertUser
+7	98.0	UpsertUser
+8	124.0	UpsertUser
+9	75.0	UpsertUser
+10	45.0	UpsertUser
+11	73.0	UpsertUser
+12	33.0	UpsertUser
+13	34.0	UpsertUser
+14	36.0	UpsertUser
+15	99.0	UpsertUser
+16	73.0	UpsertUser
+17	44.0	UpsertUser
+18	24.0	UpsertUser
+19	8.0	UpsertUser
+20	8.0	UpsertUser
+21	10.0	UpsertUser
+22	3.0	UpsertUser
+23	3.0	UpsertUser
+24	3.0	UpsertUser
+26	19.0	UpsertUser
+27	54.0	UpsertUser
+28	74.0	UpsertUser
+29	140.0	UpsertUser
+30	20.0	UpsertUser
+31	59.0	UpsertUser
+32	79.0	UpsertUser
+33	102.0	UpsertUser
+34	173.0	UpsertUser
+35	105.0	UpsertUser
+36	127.0	UpsertUser
+37	163.0	UpsertUser
+38	161.0	UpsertUser
+39	196.0	UpsertUser
+40	185.0	UpsertUser
+41	207.0	UpsertUser
+42	199.0	UpsertUser
+43	232.0	UpsertUser
+44	398.0	UpsertUser
+45	540.0	UpsertUser
+46	806.0	UpsertUser
+47	1104.0	UpsertUser
+48	1268.0	UpsertUser
+49	1601.0	UpsertUser
+50	1666.0	UpsertUser
+51	1696.0	UpsertUser
+52	1567.0	UpsertUser
+53	1802.0	UpsertUser
+54	1816.0	UpsertUser
+55	2366.0	UpsertUser
+56	3385.0	UpsertUser
+57	4382.0	UpsertUser
+58	4788.0	UpsertUser
+59	5966.0	UpsertUser
+60	7885.0	UpsertUser
+61	9078.0	UpsertUser
+62	10579.0	UpsertUser
+63	10754.0	UpsertUser
+64	11711.0	UpsertUser
+65	14970.0	UpsertUser
+66	18049.0	UpsertUser
+67	25798.0	UpsertUser
+68	98899.0	UpsertUser
+69	510537.0	UpsertUser
+70	170136.0	UpsertUser
+71	23119.0	UpsertUser
+72	12102.0	UpsertUser
+73	7332.0	UpsertUser
+74	4505.0	UpsertUser
+75	3140.0	UpsertUser
+76	2758.0	UpsertUser
+77	2286.0	UpsertUser
+78	1881.0	UpsertUser
+79	1570.0	UpsertUser
+80	1378.0	UpsertUser
+81	1195.0	UpsertUser
+82	1049.0	UpsertUser
+83	847.0	UpsertUser
+84	822.0	UpsertUser
+85	708.0	UpsertUser
+86	621.0	UpsertUser
+87	557.0	UpsertUser
+88	492.0	UpsertUser
+89	463.0	UpsertUser
+90	364.0	UpsertUser
+91	363.0	UpsertUser
+92	305.0	UpsertUser
+93	316.0	UpsertUser
+94	289.0	UpsertUser
+95	248.0	UpsertUser
+96	265.0	UpsertUser
+97	230.0	UpsertUser
+98	225.0	UpsertUser
+99	145.0	UpsertUser
+100	134.0	UpsertUser
+101	96.0	UpsertUser
+102	132.0	UpsertUser
+103	90.0	UpsertUser
+104	118.0	UpsertUser
+105	88.0	UpsertUser
+106	107.0	UpsertUser
+107	119.0	UpsertUser
+108	92.0	UpsertUser
+109	86.0	UpsertUser
+110	96.0	UpsertUser
+111	83.0	UpsertUser
+112	84.0	UpsertUser
+113	74.0	UpsertUser
+114	81.0	UpsertUser
+115	82.0	UpsertUser
+116	79.0	UpsertUser
+117	60.0	UpsertUser
+118	45.0	UpsertUser
+119	42.0	UpsertUser
+120	20.0	UpsertUser
+121	47.0	UpsertUser
+122	68.0	UpsertUser
+123	32.0	UpsertUser
+124	25.0	UpsertUser
+125	28.0	UpsertUser
+126	27.0	UpsertUser
+127	24.0	UpsertUser
+128	11.0	UpsertUser
+129	25.0	UpsertUser
+130	21.0	UpsertUser
+131	1.0	UpsertUser
+132	5.0	UpsertUser
+133	3.0	UpsertUser
+}
+{}
+{}
++ '[' 10 -le 21 ']'
++ echo TPS = 10
+TPS = 10
+++ expr 10 / 10
++ TPS_PER_THREAD=1
++ LFILE=chargingdemo_10_
++ rm chargingdemo_10_
++ rm 'chargingdemo_10__*'
++ JCOUNT=0
++ '[' 0 -lt 10 ']'
+++ expr 0 '*' 100000
++ THIS_OFFSET=0
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 0 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 0 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 0 + 1
++ JCOUNT=1
++ '[' 1 -lt 10 ']'
+++ expr 1 '*' 100000
++ THIS_OFFSET=100000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 100000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 100000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 1 + 1
++ JCOUNT=2
++ '[' 2 -lt 10 ']'
+++ expr 2 '*' 100000
++ THIS_OFFSET=200000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 200000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 200000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 2 + 1
++ JCOUNT=3
++ '[' 3 -lt 10 ']'
+++ expr 3 '*' 100000
++ THIS_OFFSET=300000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 300000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 300000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 3 + 1
++ JCOUNT=4
++ '[' 4 -lt 10 ']'
+++ expr 4 '*' 100000
++ THIS_OFFSET=400000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 400000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 400000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 4 + 1
++ JCOUNT=5
++ '[' 5 -lt 10 ']'
+++ expr 5 '*' 100000
++ THIS_OFFSET=500000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 500000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 500000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 5 + 1
++ JCOUNT=6
++ '[' 6 -lt 10 ']'
+++ expr 6 '*' 100000
++ THIS_OFFSET=600000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 600000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 600000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 6 + 1
++ JCOUNT=7
++ '[' 7 -lt 10 ']'
+++ expr 7 '*' 100000
++ THIS_OFFSET=700000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 700000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 700000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 7 + 1
++ JCOUNT=8
++ '[' 8 -lt 10 ']'
+++ expr 8 '*' 100000
++ THIS_OFFSET=800000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 800000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 800000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 8 + 1
++ JCOUNT=9
++ '[' 9 -lt 10 ']'
+++ expr 9 '*' 100000
++ THIS_OFFSET=900000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 900000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 900000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 9 + 1
++ JCOUNT=10
++ '[' 10 -lt 10 ']'
++ sleep 20
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
++ cd ../ddl
++ sqlcmd --servers=192.168.0.20
+
+load classes ../jars/voltdb-chargingdemo.jar;
+Command succeeded.
++ sleep 180
++ sqlcmd --servers=192.168.0.20
++ '[' 0 = 255 ']'
++ wait
++ ACTUALREPORTEDTPS=0
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__0.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 0 + 2
++ ACTUALREPORTEDTPS=2
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__1.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 2 + 2
++ ACTUALREPORTEDTPS=4
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__2.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 4 + 2
++ ACTUALREPORTEDTPS=6
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__3.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 6 + 2
++ ACTUALREPORTEDTPS=8
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__4.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 8 + 2
++ ACTUALREPORTEDTPS=10
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__5.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 10 + 2
++ ACTUALREPORTEDTPS=12
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__6.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 12 + 2
++ ACTUALREPORTEDTPS=14
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__7.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 14 + 2
++ ACTUALREPORTEDTPS=16
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__8.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 16 + 2
++ ACTUALREPORTEDTPS=18
++ for i in '${LFILE}_[0123456789]*.lst'
+++ grep 'entries per ms while doing transactions' chargingdemo_10__9.lst
+++ awk '{ print $3 }'
++ TPSFORTHISFILE=2
++ echo TPSFORTHISFILE=2
+TPSFORTHISFILE=2
+++ expr 18 + 2
++ ACTUALREPORTEDTPS=20
++ cat chargingdemo_10__0.lst chargingdemo_10__1.lst chargingdemo_10__2.lst chargingdemo_10__3.lst chargingdemo_10__4.lst chargingdemo_10__5.lst chargingdemo_10__6.lst chargingdemo_10__7.lst chargingdemo_10__8.lst chargingdemo_10__9.lst
+++ grep 'GREPABLE SUMMARY' chargingdemo_10__1.lst
++ GS='2020-08-26 11:08:13:GREPABLE SUMMARY:1:2:31:50:249:0:0:0:11:13:25:20:27:49:11:14:48:'
++ rm chargingdemo_10__0.lst chargingdemo_10__1.lst chargingdemo_10__2.lst chargingdemo_10__3.lst chargingdemo_10__4.lst chargingdemo_10__5.lst chargingdemo_10__6.lst chargingdemo_10__7.lst chargingdemo_10__8.lst chargingdemo_10__9.lst
++ echo 10:20:180:100000:5:10:192.168.0.20:2020-08-26 11:08:13:GREPABLE SUMMARY:1:2:31:50:249:0:0:0:11:13:25:20:27:49:11:14:48:::::
++ sqlcmd --servers=192.168.0.20
+
+delete from user_recent_transactions where USER_TXN_ID not like 'Create%';
+(Returned 4894215 rows in 10.63s)
+
+delete from user_usage_table;
+(Returned 4304724 rows in 0.30s)
+++ expr 10 + 1
++ THISTPS=11
++ '[' 11 -le 21 ']'
++ echo TPS = 11
+TPS = 11
+++ expr 11 / 10
++ TPS_PER_THREAD=1
++ LFILE=chargingdemo_11_
++ rm chargingdemo_11_
++ rm chargingdemo_11__0.lst chargingdemo_11__1.lst chargingdemo_11__2.lst chargingdemo_11__3.lst chargingdemo_11__4.lst chargingdemo_11__5.lst chargingdemo_11__6.lst chargingdemo_11__7.lst chargingdemo_11__8.lst chargingdemo_11__9.lst
++ JCOUNT=0
++ '[' 0 -lt 10 ']'
+++ expr 0 '*' 100000
++ THIS_OFFSET=0
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 0 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 0 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 0 + 1
++ JCOUNT=1
++ '[' 1 -lt 10 ']'
+++ expr 1 '*' 100000
++ THIS_OFFSET=100000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 100000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 100000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 1 + 1
++ JCOUNT=2
++ '[' 2 -lt 10 ']'
+++ expr 2 '*' 100000
++ THIS_OFFSET=200000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 200000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 200000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 2 + 1
++ JCOUNT=3
++ '[' 3 -lt 10 ']'
+++ expr 3 '*' 100000
++ THIS_OFFSET=300000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 300000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 300000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 3 + 1
++ JCOUNT=4
++ '[' 4 -lt 10 ']'
+++ expr 4 '*' 100000
++ THIS_OFFSET=400000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 400000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 400000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 4 + 1
++ JCOUNT=5
++ '[' 5 -lt 10 ']'
+++ expr 5 '*' 100000
++ THIS_OFFSET=500000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 500000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 500000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 5 + 1
++ JCOUNT=6
++ '[' 6 -lt 10 ']'
+++ expr 6 '*' 100000
++ THIS_OFFSET=600000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 600000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 600000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 6 + 1
++ JCOUNT=7
++ '[' 7 -lt 10 ']'
+++ expr 7 '*' 100000
++ THIS_OFFSET=700000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 700000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 700000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 7 + 1
++ JCOUNT=8
++ '[' 8 -lt 10 ']'
+++ expr 8 '*' 100000
++ THIS_OFFSET=800000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 800000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 800000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 8 + 1
++ JCOUNT=9
++ '[' 9 -lt 10 ']'
+++ expr 9 '*' 100000
++ THIS_OFFSET=900000
++ echo java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 900000 1 TRANSACTIONS 10 180 10 100000 5
++ java -jar ../jars/voltdb-chargingdemo-client.jar 192.168.0.20 100000 900000 1 TRANSACTIONS 10 180 10 100000 5
+++ expr 9 + 1
++ JCOUNT=10
++ '[' 10 -lt 10 ']'
++ sleep 20
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by io.netty_voltpatches.NinjaKeySet (file:/Users/drolfe/Desktop/EclipseWorkspace/voltdb-chargingdemo/jars/voltdb-chargingdemo-client.jar) to field sun.nio.ch.SelectorImpl.selectedKeys
+WARNING: Please consider reporting this to the maintainers of io.netty_voltpatches.NinjaKeySet
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
++ cd ../ddl
++ sqlcmd --servers=192.168.0.20
+
+load classes ../jars/voltdb-chargingdemo.jar;
+Connection to database host (hardtofind.Home/192.168.0.20:21212) was lost before a response was received
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
+Aug 26, 2020 11:09:00 AM org.voltcore.logging.VoltUtilLoggingLogger log
+WARNING: Connection to VoltDB node at: hardtofind.Home:21212 was lost.
++ sleep 180
++ sqlcmd --servers=192.168.0.20
+Unable to connect to VoltDB cluster
+    192.168.0.20:21212 - Connection refused
++ '[' 255 = 255 ']'
++ echo REPRODUCED
+REPRODUCED
++ exit 1
+bash-3.2$ cd
+bash-3.2$ cd Dec[Ksktop/
+bash-3.2$ cd EclipseWorkspace/
+bash-3.2$ git clone https://github.com/srmadscience/931issue200826.git
+Cloning into '931issue200826'...
+remote: Enumerating objects: 3, done.[K
+remote: Counting objects:  33% (1/3)[Kremote: Counting objects:  66% (2/3)[Kremote: Counting objects: 100% (3/3)[Kremote: Counting objects: 100% (3/3), done.[K
+remote: Compressing objects:  50% (1/2)[Kremote: Compressing objects: 100% (2/2)[Kremote: Compressing objects: 100% (2/2), done.[K
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0[K
+Unpacking objects:  33% (1/3)Unpacking objects:  66% (2/3)Unpacking objects: 100% (3/3)Unpacking objects: 100% (3/3), done.
+bash-3.2$ cp =r v[K[K[K[K[K-[K[K[Kman cp
+[?1049h[?1h=
+CP(1)                     BSD General Commands Manual                    CP(1)
+
+[1mNAME[0m
+     [1mcp[0m -- copy files
+
+[1mSYNOPSIS[0m
+     [1mcp[0m [[1m-R[0m [[1m-H[0m | [1m-L[0m | [1m-P[0m]] [[1m-fi[0m | [1m-n[0m] [[1m-apvX[0m] [4msource_file[24m [4mtarget_file[24m
+     [1mcp[0m [[1m-R[0m [[1m-H[0m | [1m-L[0m | [1m-P[0m]] [[1m-fi[0m | [1m-n[0m] [[1m-apvX[0m] [4msource_file[24m [4m...[24m [4mtarget_directory[24m
+
+[1mDESCRIPTION[0m
+     In the first synopsis form, the [1mcp[0m utility copies the contents of the [4msource_file[24m to the [4mtarget_file[24m.  In the sec-
+     ond synopsis form, the contents of each named [4msource_file[24m is copied to the destination [4mtarget_directory[24m.  The names
+     of the files themselves are not changed.  If [1mcp[0m detects an attempt to copy a file to itself, the copy will fail.
+
+     The following options are available:
+
+     [1m-a[0m    Same as [1m-pPR[0m options. Preserves structure and attributes of files but not directory structure.
+
+     [1m-f[0m    If the destination file cannot be opened, remove it and create a new file, without prompting for confirmation
+           regardless of its permissions.  (The [1m-f[0m option overrides any previous [1m-n[0m option.)
+
+           The target file is not unlinked before the copy.  Thus, any existing access rights will be retained.
+
+     [1m-H[0m    If the [1m-R[0m option is specified, symbolic links on the command line are followed.  (Symbolic links encountered
+           in the tree traversal are not followed.)
+
+     [1m-i[0m    Cause [1mcp[0m to write a prompt to the standard error output before copying a file that would overwrite an exist-
+           ing file.  If the response from the standard input begins with the character `y' or `Y', the file copy is
+           attempted.  (The [1m-i[0m option overrides any previous [1m-n[0m option.)
+:[K[K
+     [1m-L[0m    If the [1m-R[0m option is specified, all symbolic links are followed.
+
+     [1m-n[0m    Do not overwrite an existing file.  (The [1m-n[0m option overrides any previous [1m-f[0m or [1m-i[0m options.)
+
+     [1m-P[0m    If the [1m-R[0m option is specified, no symbolic links are followed.  This is the default.
+
+     [1m-p[0m    Cause [1mcp[0m to preserve the following attributes of each source file in the copy: modification time, access
+           time, file flags, file mode, user ID, and group ID, as allowed by permissions.  Access Control Lists (ACLs)
+           and Extended Attributes (EAs), including resource forks, will also be preserved.
+
+           If the user ID and group ID cannot be preserved, no error message is displayed and the exit value is not
+           altered.
+
+           If the source file has its set-user-ID bit on and the user ID cannot be preserved, the set-user-ID bit is not
+           preserved in the copy's permissions.  If the source file has its set-group-ID bit on and the group ID cannot
+           be preserved, the set-group-ID bit is not preserved in the copy's permissions.  If the source file has both
+           its set-user-ID and set-group-ID bits on, and either the user ID or group ID cannot be preserved, neither the
+           set-user-ID nor set-group-ID bits are preserved in the copy's permissions.
+
+     [1m-R[0m    If [4msource_file[24m designates a directory, [1mcp[0m copies the directory and the entire subtree connected at that
+           point.  If the [4msource_file[24m ends in a [4m/[24m, the contents of the directory are copied rather than the directory
+           itself.  This option also causes symbolic links to be copied, rather than indirected through, and for [1mcp[0m to
+           create special files rather than copying them as normal files.  Created directories have the same mode as the
+           corresponding source directory, unmodified by the process' umask.
+
+           In [1m-R[0m mode, [1mcp[0m will continue copying even if errors are detected.
+
+           Note that [1mcp[0m copies hard-linked files as separate files.  If you need to preserve hard links, consider using
+           tar(1), cpio(1), or pax(1) instead.
+:[K[K
+     [1m-v[0m    Cause [1mcp[0m to be verbose, showing files as they are copied.
+
+     [1m-X[0m    Do not copy Extended Attributes (EAs) or resource forks.
+
+     [1m-c[0m    copy files using clonefile(2)
+
+     For each destination file that already exists, its contents are overwritten if permissions allow.  Its mode, user
+     ID, and group ID are unchanged unless the [1m-p[0m option was specified.
+
+     In the second synopsis form, [4mtarget_directory[24m must exist unless there is only one named [4msource_file[24m which is a
+     directory and the [1m-R[0m flag is specified.
+
+     If the destination file does not exist, the mode of the source file is used as modified by the file mode creation
+     mask ([1mumask[0m, see csh(1)).  If the source file has its set-user-ID bit on, that bit is removed unless both the
+     source file and the destination file are owned by the same user.  If the source file has its set-group-ID bit on,
+     that bit is removed unless both the source file and the destination file are in the same group and the user is a
+     member of that group.  If both the set-user-ID and set-group-ID bits are set, all of the above conditions must be
+     fulfilled or both bits are removed.
+
+     Appropriate permissions are required for file creation or overwriting.
+
+     Symbolic links are always followed unless the [1m-R[0m flag is set, in which case symbolic links are not followed, by
+     default.  The [1m-H[0m or [1m-L[0m flags (in conjunction with the [1m-R[0m flag) cause symbolic links to be followed as described
+     above.  The [1m-H[0m, [1m-L[0m and [1m-P[0m options are ignored unless the [1m-R[0m option is specified.  In addition, these options over-
+     ride each other and the command's actions are determined by the last one specified.
+
+     If [1mcp[0m receives a SIGINFO (see the [1mstatus[0m argument for stty(1)) signal, the current input and output file and the
+     percentage complete will be written to the standard output.
+
+:[K[K[HM           tar(1), cpio(1), or pax(1) instead.
+[HM           Note that [1mcp[0m copies hard-linked files as separate files.  If you need to preserve hard links, consider using
+[HM
+[HM           In [1m-R[0m mode, [1mcp[0m will continue copying even if errors are detected.
+[HM
+[HM           corresponding source directory, unmodified by the process' umask.
+[HM           create special files rather than copying them as normal files.  Created directories have the same mode as the
+[HM           itself.  This option also causes symbolic links to be copied, rather than indirected through, and for [1mcp[0m to
+[HM           point.  If the [4msource_file[24m ends in a [4m/[24m, the contents of the directory are copied rather than the directory
+[HM     [1m-R[0m    If [4msource_file[24m designates a directory, [1mcp[0m copies the directory and the entire subtree connected at that
+[HM
+[HM           set-user-ID nor set-group-ID bits are preserved in the copy's permissions.
+[HM           its set-user-ID and set-group-ID bits on, and either the user ID or group ID cannot be preserved, neither the
+[HM           be preserved, the set-group-ID bit is not preserved in the copy's permissions.  If the source file has both
+[HM           preserved in the copy's permissions.  If the source file has its set-group-ID bit on and the group ID cannot
+[HM           If the source file has its set-user-ID bit on and the user ID cannot be preserved, the set-user-ID bit is not
+[HM
+[HM           altered.
+[HM           If the user ID and group ID cannot be preserved, no error message is displayed and the exit value is not
+[HM
+[HM           and Extended Attributes (EAs), including resource forks, will also be preserved.
+[HM           time, file flags, file mode, user ID, and group ID, as allowed by permissions.  Access Control Lists (ACLs)
+[HM     [1m-p[0m    Cause [1mcp[0m to preserve the following attributes of each source file in the copy: modification time, access
+[HM
+[HM     [1m-P[0m    If the [1m-R[0m option is specified, no symbolic links are followed.  This is the default.
+[HM
+[HM     [1m-n[0m    Do not overwrite an existing file.  (The [1m-n[0m option overrides any previous [1m-f[0m or [1m-i[0m options.)
+[HM
+[HM     [1m-L[0m    If the [1m-R[0m option is specified, all symbolic links are followed.
+[HM
+[31;1H[K:[K[K[?1l>[?1049lbash-3.2$ cp -r voltdb-chargingdemo/* 931issue200826.git
+usage: cp [-R [-H | -L | -P]] [-fi | -n] [-apvXc] source_file target_file
+       cp [-R [-H | -L | -P]] [-fi | -n] [-apvXc] source_file ... target_directory
+bash-3.2$ cp -r voltdb-chargingdemo/* 931issue200826.git[K[K[K[K
+bash-3.2$ ./flushGit.sh 931issue200826.git "First Commit"
+931issue200826.git not a directory
+bash-3.2$ ./flushGit.sh 931issue200826.git "First Commit"[1P[1P[1P[1P
+./ddl/log
+find: ./ddl/log: No such file or directory
+./scripts/log
+find: ./scripts/log: No such file or directory
+[master 45735b3] First Commit
+ 79 files changed, 114484 insertions(+)
+ create mode 100644 LICENSE
+ create mode 100644 README.md
+ create mode 100644 ddl/db.sql
+ create mode 100644 ddl/dbprocs.sql
+ create mode 100644 ddl/disabletask.sql
+ create mode 100644 ddl/enabletask.sql
+ create mode 100644 jars/dothis.sh
+ create mode 100644 results/chargingdemo_schema.png
+ create mode 100644 results/sorted_raw_data190725.xls
+ create mode 100644 results/sorted_raw_data_chart190725.png
+ create mode 100644 scripts/202008251357perf.txt
+ create mode 100644 scripts/202008251408perf.txt
+ create mode 100644 scripts/202008260834perf.txt
+ create mode 100644 scripts/202008260923perf.txt
+ create mode 100644 scripts/202008260937perf.txt
+ create mode 100644 scripts/202008260945perf.txt
+ create mode 100644 scripts/202008261016perf.txt
+ create mode 100644 scripts/202008261024perf.txt
+ create mode 100644 scripts/202008261032perf.txt
+ create mode 100644 scripts/202008261104perf.txt
+ create mode 100644 scripts/bmon.out
+ create mode 100644 scripts/chargingdemo_10_.lst
+ create mode 100644 scripts/chargingdemo_11_.lst
+ create mode 100644 scripts/chargingdemo_11__0.lst
+ create mode 100644 scripts/chargingdemo_11__1.lst
+ create mode 100644 scripts/chargingdemo_11__2.lst
+ create mode 100644 scripts/chargingdemo_11__3.lst
+ create mode 100644 scripts/chargingdemo_11__4.lst
+ create mode 100644 scripts/chargingdemo_11__5.lst
+ create mode 100644 scripts/chargingdemo_11__6.lst
+ create mode 100644 scripts/chargingdemo_11__7.lst
+ create mode 100644 scripts/chargingdemo_11__8.lst
+ create mode 100644 scripts/chargingdemo_11__9.lst
+ create mode 100644 scripts/chargingdemo_12_.lst
+ create mode 100644 scripts/chargingdemo_13_.lst
+ create mode 100644 scripts/chargingdemo_14_.lst
+ create mode 100644 scripts/chargingdemo_15_.lst
+ create mode 100644 scripts/chargingdemo_16_.lst
+ create mode 100644 scripts/chargingdemo_17_.lst
+ create mode 100644 scripts/chargingdemo_18__0.lst
+ create mode 100644 scripts/chargingdemo_18__1.lst
+ create mode 100644 scripts/chargingdemo_18__2.lst
+ create mode 100644 scripts/chargingdemo_18__3.lst
+ create mode 100644 scripts/chargingdemo_18__4.lst
+ create mode 100644 scripts/chargingdemo_18__5.lst
+ create mode 100644 scripts/chargingdemo_18__6.lst
+ create mode 100644 scripts/chargingdemo_18__7.lst
+ create mode 100644 scripts/chargingdemo_18__8.lst
+ create mode 100644 scripts/chargingdemo_18__9.lst
+ create mode 100644 scripts/chargingdemo_1_.lst
+ create mode 100644 scripts/chargingdemo_2_.lst
+ create mode 100644 scripts/del.sql
+ create mode 100644 scripts/localcpu.txt
+ create mode 100644 scripts/remotecpu.sh
+ create mode 100644 scripts/remotecpu.txt
+ create mode 100644 scripts/reproduce.sh
+ create mode 100644 scripts/reproduction.lst
+ create mode 100644 scripts/runtest.sh
+ create mode 100644 src/chargingdemoprocs/AddCredit.java
+ create mode 100644 src/chargingdemoprocs/DelUser.java
+ create mode 100644 src/chargingdemoprocs/DeleteStaleAllocations.java
+ create mode 100644 src/chargingdemoprocs/GetAndLockUser.java
+ create mode 100644 src/chargingdemoprocs/GetUser.java
+ create mode 100644 src/chargingdemoprocs/ReferenceData.java
+ create mode 100644 src/chargingdemoprocs/ReportQuotaUsage.java
+ create mode 100644 src/chargingdemoprocs/UpdateLockedUser.java
+ create mode 100644 src/chargingdemoprocs/UpsertUser.java
+ create mode 100644 src/chargingdemotasks/PurgeWrangler.java
+ create mode 100644 src/chargingdemotasks/TaskMessageType.java
+ create mode 100644 src/org/voltdb/chargingdemo/AddCreditCallback.java
+ create mode 100644 src/org/voltdb/chargingdemo/ChargingDemo.java
+ create mode 100644 src/org/voltdb/chargingdemo/ComplainOnDifferenceCallback.java
+ create mode 100644 src/org/voltdb/chargingdemo/ComplainOnErrorCallback.java
+ create mode 100644 src/org/voltdb/chargingdemo/ReportLatencyCallback.java
+ create mode 100644 src/org/voltdb/chargingdemo/UpdateSessionStateCallback.java
+ create mode 100644 src/org/voltdb/chargingdemo/UserState.java
+ create mode 100644 src/org/voltdb/voltutil/stats/SafeHistogramCache.java
+ create mode 100644 src/org/voltdb/voltutil/stats/SizeHistogram.java
+ create mode 100644 src/org/voltdb/voltutil/stats/StatsHistogram.java
+Enumerating objects: 92, done.
+Counting objects:   1% (1/92)Counting objects:   2% (2/92)Counting objects:   3% (3/92)Counting objects:   4% (4/92)Counting objects:   5% (5/92)Counting objects:   6% (6/92)Counting objects:   7% (7/92)Counting objects:   8% (8/92)Counting objects:   9% (9/92)Counting objects:  10% (10/92)Counting objects:  11% (11/92)Counting objects:  13% (12/92)Counting objects:  14% (13/92)Counting objects:  15% (14/92)Counting objects:  16% (15/92)Counting objects:  17% (16/92)Counting objects:  18% (17/92)Counting objects:  19% (18/92)Counting objects:  20% (19/92)Counting objects:  21% (20/92)Counting objects:  22% (21/92)Counting objects:  23% (22/92)Counting objects:  25% (23/92)Counting objects:  26% (24/92)Counting objects:  27% (25/92)Counting objects:  28% (26/92)Counting objects:  29% (27/92)Counting objects:  30% (28/92)Counting objects:  31% (29/92)Counting objects:  32% (30/92)Counting objects:  33% (31/92)Counting objects:  34% (32/92)Counting objects:  35% (33/92)Counting objects:  36% (34/92)Counting objects:  38% (35/92)Counting objects:  39% (36/92)Counting objects:  40% (37/92)Counting objects:  41% (38/92)Counting objects:  42% (39/92)Counting objects:  43% (40/92)Counting objects:  44% (41/92)Counting objects:  45% (42/92)Counting objects:  46% (43/92)Counting objects:  47% (44/92)Counting objects:  48% (45/92)Counting objects:  50% (46/92)Counting objects:  51% (47/92)Counting objects:  52% (48/92)Counting objects:  53% (49/92)Counting objects:  54% (50/92)Counting objects:  55% (51/92)Counting objects:  56% (52/92)Counting objects:  57% (53/92)Counting objects:  58% (54/92)Counting objects:  59% (55/92)Counting objects:  60% (56/92)Counting objects:  61% (57/92)Counting objects:  63% (58/92)Counting objects:  64% (59/92)Counting objects:  65% (60/92)Counting objects:  66% (61/92)Counting objects:  67% (62/92)Counting objects:  68% (63/92)Counting objects:  69% (64/92)Counting objects:  70% (65/92)Counting objects:  71% (66/92)Counting objects:  72% (67/92)Counting objects:  73% (68/92)Counting objects:  75% (69/92)Counting objects:  76% (70/92)Counting objects:  77% (71/92)Counting objects:  78% (72/92)Counting objects:  79% (73/92)Counting objects:  80% (74/92)Counting objects:  81% (75/92)Counting objects:  82% (76/92)Counting objects:  83% (77/92)Counting objects:  84% (78/92)Counting objects:  85% (79/92)Counting objects:  86% (80/92)Counting objects:  88% (81/92)Counting objects:  89% (82/92)Counting objects:  90% (83/92)Counting objects:  91% (84/92)Counting objects:  92% (85/92)Counting objects:  93% (86/92)Counting objects:  94% (87/92)Counting objects:  95% (88/92)Counting objects:  96% (89/92)Counting objects:  97% (90/92)Counting objects:  98% (91/92)Counting objects: 100% (92/92)Counting objects: 100% (92/92), done.
+Delta compression using up to 8 threads
+Compressing objects:   1% (1/84)Compressing objects:   2% (2/84)Compressing objects:   3% (3/84)Compressing objects:   4% (4/84)Compressing objects:   5% (5/84)Compressing objects:   7% (6/84)Compressing objects:   8% (7/84)Compressing objects:   9% (8/84)Compressing objects:  10% (9/84)Compressing objects:  11% (10/84)Compressing objects:  13% (11/84)Compressing objects:  14% (12/84)Compressing objects:  15% (13/84)Compressing objects:  16% (14/84)Compressing objects:  17% (15/84)Compressing objects:  19% (16/84)Compressing objects:  20% (17/84)Compressing objects:  21% (18/84)Compressing objects:  22% (19/84)Compressing objects:  23% (20/84)Compressing objects:  25% (21/84)Compressing objects:  26% (22/84)Compressing objects:  27% (23/84)Compressing objects:  28% (24/84)Compressing objects:  29% (25/84)Compressing objects:  30% (26/84)Compressing objects:  32% (27/84)Compressing objects:  33% (28/84)Compressing objects:  34% (29/84)Compressing objects:  35% (30/84)Compressing objects:  36% (31/84)Compressing objects:  38% (32/84)Compressing objects:  39% (33/84)Compressing objects:  40% (34/84)Compressing objects:  41% (35/84)Compressing objects:  42% (36/84)Compressing objects:  44% (37/84)Compressing objects:  45% (38/84)Compressing objects:  46% (39/84)Compressing objects:  47% (40/84)Compressing objects:  48% (41/84)Compressing objects:  50% (42/84)Compressing objects:  51% (43/84)Compressing objects:  52% (44/84)Compressing objects:  53% (45/84)Compressing objects:  54% (46/84)Compressing objects:  55% (47/84)Compressing objects:  57% (48/84)Compressing objects:  58% (49/84)Compressing objects:  59% (50/84)Compressing objects:  60% (51/84)Compressing objects:  61% (52/84)Compressing objects:  63% (53/84)Compressing objects:  64% (54/84)Compressing objects:  65% (55/84)Compressing objects:  66% (56/84)Compressing objects:  67% (57/84)Compressing objects:  69% (58/84)Compressing objects:  70% (59/84)Compressing objects:  71% (60/84)Compressing objects:  72% (61/84)Compressing objects:  73% (62/84)Compressing objects:  75% (63/84)Compressing objects:  76% (64/84)Compressing objects:  77% (65/84)Compressing objects:  78% (66/84)Compressing objects:  79% (67/84)Compressing objects:  80% (68/84)Compressing objects:  82% (69/84)Compressing objects:  83% (70/84)Compressing objects:  84% (71/84)Compressing objects:  85% (72/84)Compressing objects:  86% (73/84)Compressing objects:  88% (74/84)Compressing objects:  89% (75/84)Compressing objects:  90% (76/84)Compressing objects:  91% (77/84)Compressing objects:  92% (78/84)Compressing objects:  94% (79/84)Compressing objects:  95% (80/84)Compressing objects:  96% (81/84)Compressing objects:  97% (82/84)Compressing objects:  98% (83/84)Compressing objects: 100% (84/84)Compressing objects: 100% (84/84), done.
+Writing objects:   1% (1/91)Writing objects:   2% (2/91)Writing objects:   3% (3/91)Writing objects:   4% (4/91)Writing objects:   5% (5/91)Writing objects:   6% (6/91)Writing objects:   7% (7/91)Writing objects:   8% (8/91)Writing objects:   9% (9/91)Writing objects:  10% (10/91)Writing objects:  12% (11/91)Writing objects:  13% (12/91)Writing objects:  14% (13/91)Writing objects:  15% (14/91)Writing objects:  16% (15/91)Writing objects:  17% (16/91)Writing objects:  18% (17/91)Writing objects:  19% (18/91)Writing objects:  20% (19/91)Writing objects:  21% (20/91)Writing objects:  23% (21/91)Writing objects:  24% (22/91)Writing objects:  25% (23/91)Writing objects:  26% (24/91)Writing objects:  27% (25/91)Writing objects:  28% (26/91)Writing objects:  29% (27/91)Writing objects:  30% (28/91)Writing objects:  31% (29/91)Writing objects:  35% (32/91)Writing objects:  36% (33/91)Writing objects:  37% (34/91)Writing objects:  38% (35/91)Writing objects:  39% (36/91)Writing objects:  41% (38/91)Writing objects:  42% (39/91)Writing objects:  47% (43/91)Writing objects:  48% (44/91)Writing objects:  49% (45/91)Writing objects:  51% (47/91)Writing objects:  52% (48/91)Writing objects:  53% (49/91)Writing objects:  54% (50/91)Writing objects:  56% (51/91)Writing objects:  58% (53/91)Writing objects:  59% (54/91)Writing objects:  60% (55/91)Writing objects:  62% (57/91)Writing objects:  63% (58/91)Writing objects:  64% (59/91)Writing objects:  67% (61/91)Writing objects:  68% (62/91)Writing objects:  69% (63/91)Writing objects:  70% (64/91)Writing objects:  71% (65/91)Writing objects:  73% (67/91)Writing objects:  74% (68/91)Writing objects:  75% (69/91)Writing objects:  76% (70/91)Writing objects:  79% (72/91)Writing objects:  80% (73/91)Writing objects:  81% (74/91)Writing objects:  82% (75/91)Writing objects:  83% (76/91)Writing objects:  84% (77/91)Writing objects:  85% (78/91)Writing objects:  86% (79/91)Writing objects:  87% (80/91)Writing objects:  89% (81/91)Writing objects:  91% (83/91)Writing objects:  93% (85/91)Writing objects:  94% (86/91)Writing objects:  95% (87/91)Writing objects:  96% (88/91)Writing objects:  97% (89/91)Writing objects: 100% (91/91)Writing objects: 100% (91/91), 814.74 KiB | 8.95 MiB/s, done.
+Total 91 (delta 35), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/35)[Kremote: Resolving deltas:   8% (3/35)[Kremote: Resolving deltas:  25% (9/35)[Kremote: Resolving deltas:  51% (18/35)[Kremote: Resolving deltas:  65% (23/35)[Kremote: Resolving deltas:  68% (24/35)[Kremote: Resolving deltas:  71% (25/35)[Kremote: Resolving deltas:  82% (29/35)[Kremote: Resolving deltas:  85% (30/35)[Kremote: Resolving deltas:  88% (31/35)[Kremote: Resolving deltas:  94% (33/35)[Kremote: Resolving deltas:  97% (34/35)[Kremote: Resolving deltas: 100% (35/35)[Kremote: Resolving deltas: 100% (35/35), done.[K
+To https://github.com/srmadscience/931issue200826.git
+   e793cfa..45735b3  master -> master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+bash-3.2$ ./flushGit.sh 931issue200826 "First Commit"[C[1P Commit"[1P Commit"[1P Commit"[1P Commit"[1P Commit"S Commit"e Commit"c Commit"o Commit"n Commit"d Commit"
+./ddl/log
+find: ./ddl/log: No such file or directory
+./scripts/log
+find: ./scripts/log: No such file or directory
+[master 5ad05cf] Second Commit
+ 45 files changed, 17825 insertions(+), 109753 deletions(-)
+ delete mode 100644 scripts/202008251357perf.txt
+ delete mode 100644 scripts/202008251408perf.txt
+ delete mode 100644 scripts/202008260834perf.txt
+ delete mode 100644 scripts/202008260923perf.txt
+ delete mode 100644 scripts/202008260937perf.txt
+ delete mode 100644 scripts/202008260945perf.txt
+ delete mode 100644 scripts/202008261016perf.txt
+ delete mode 100644 scripts/202008261024perf.txt
+ delete mode 100644 scripts/202008261032perf.txt
+ delete mode 100644 scripts/202008261104perf.txt
+ create mode 100644 scripts/202008261117perf.txt
+ delete mode 100644 scripts/bmon.out
+ rewrite scripts/chargingdemo_10_.lst (92%)
+ delete mode 100644 scripts/chargingdemo_11_.lst
+ rewrite scripts/chargingdemo_11__2.lst (61%)
+ rewrite scripts/chargingdemo_11__3.lst (75%)
+ copy scripts/{chargingdemo_11__2.lst => chargingdemo_11__6.lst} (51%)
+ delete mode 100644 scripts/chargingdemo_12_.lst
+ delete mode 100644 scripts/chargingdemo_13_.lst
+ delete mode 100644 scripts/chargingdemo_14_.lst
+ delete mode 100644 scripts/chargingdemo_15_.lst
+ delete mode 100644 scripts/chargingdemo_16_.lst
+ delete mode 100644 scripts/chargingdemo_17_.lst
+ delete mode 100644 scripts/chargingdemo_18__0.lst
+ delete mode 100644 scripts/chargingdemo_18__1.lst
+ delete mode 100644 scripts/chargingdemo_18__2.lst
+ delete mode 100644 scripts/chargingdemo_18__3.lst
+ delete mode 100644 scripts/chargingdemo_18__4.lst
+ delete mode 100644 scripts/chargingdemo_18__5.lst
+ delete mode 100644 scripts/chargingdemo_18__6.lst
+ delete mode 100644 scripts/chargingdemo_18__7.lst
+ delete mode 100644 scripts/chargingdemo_18__8.lst
+ delete mode 100644 scripts/chargingdemo_18__9.lst
+ delete mode 100644 scripts/chargingdemo_1_.lst
+ delete mode 100644 scripts/chargingdemo_2_.lst
+ delete mode 100644 scripts/localcpu.txt
+ delete mode 100644 scripts/remotecpu.txt
+ rename scripts/{reproduction.lst => reproduce.typescript} (52%)
+Enumerating objects: 29, done.
+Counting objects:   3% (1/29)Counting objects:   6% (2/29)Counting objects:  10% (3/29)Counting objects:  13% (4/29)Counting objects:  17% (5/29)Counting objects:  20% (6/29)Counting objects:  24% (7/29)Counting objects:  27% (8/29)Counting objects:  31% (9/29)Counting objects:  34% (10/29)Counting objects:  37% (11/29)Counting objects:  41% (12/29)Counting objects:  44% (13/29)Counting objects:  48% (14/29)Counting objects:  51% (15/29)Counting objects:  55% (16/29)Counting objects:  58% (17/29)Counting objects:  62% (18/29)Counting objects:  65% (19/29)Counting objects:  68% (20/29)Counting objects:  72% (21/29)Counting objects:  75% (22/29)Counting objects:  79% (23/29)Counting objects:  82% (24/29)Counting objects:  86% (25/29)Counting objects:  89% (26/29)Counting objects:  93% (27/29)Counting objects:  96% (28/29)Counting objects: 100% (29/29)Counting objects: 100% (29/29), done.
+Delta compression using up to 8 threads
+Compressing objects:   6% (1/16)Compressing objects:  12% (2/16)Compressing objects:  18% (3/16)Compressing objects:  25% (4/16)Compressing objects:  31% (5/16)Compressing objects:  37% (6/16)Compressing objects:  43% (7/16)Compressing objects:  50% (8/16)Compressing objects:  56% (9/16)Compressing objects:  62% (10/16)Compressing objects:  68% (11/16)Compressing objects:  75% (12/16)Compressing objects:  81% (13/16)Compressing objects:  87% (14/16)Compressing objects:  93% (15/16)Compressing objects: 100% (16/16)Compressing objects: 100% (16/16), done.
+Writing objects:   6% (1/16)Writing objects:  12% (2/16)Writing objects:  18% (3/16)Writing objects:  25% (4/16)Writing objects:  31% (5/16)Writing objects:  43% (7/16)Writing objects:  56% (9/16)Writing objects:  62% (10/16)Writing objects:  75% (12/16)Writing objects:  81% (13/16)Writing objects:  87% (14/16)Writing objects:  93% (15/16)Writing objects: 100% (16/16)Writing objects: 100% (16/16), 49.57 KiB | 1.01 MiB/s, done.
+Total 16 (delta 12), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/12)[Kremote: Resolving deltas:   8% (1/12)[Kremote: Resolving deltas:  16% (2/12)[Kremote: Resolving deltas:  41% (5/12)[Kremote: Resolving deltas: 100% (12/12)[Kremote: Resolving deltas: 100% (12/12), completed with 4 local objects.[K
+To https://github.com/srmadscience/931issue200826.git
+   45735b3..5ad05cf  master -> master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+bash-3.2$ ./flushGit.sh 931issue200826 "Second Commit"
+[master c9e0f20] Second Commit
+ 1 file changed, 314 insertions(+)
+ create mode 100644 scripts/volt.voltlog
+Enumerating objects: 6, done.
+Counting objects:  16% (1/6)Counting objects:  33% (2/6)Counting objects:  50% (3/6)Counting objects:  66% (4/6)Counting objects:  83% (5/6)Counting objects: 100% (6/6)Counting objects: 100% (6/6), done.
+Delta compression using up to 8 threads
+Compressing objects:  25% (1/4)Compressing objects:  50% (2/4)Compressing objects:  75% (3/4)Compressing objects: 100% (4/4)Compressing objects: 100% (4/4), done.
+Writing objects:  25% (1/4)Writing objects:  50% (2/4)Writing objects:  75% (3/4)Writing objects: 100% (4/4)Writing objects: 100% (4/4), 7.92 KiB | 7.92 MiB/s, done.
+Total 4 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/2)[Kremote: Resolving deltas:  50% (1/2)[Kremote: Resolving deltas: 100% (2/2)[Kremote: Resolving deltas: 100% (2/2), completed with 2 local objects.[K
+To https://github.com/srmadscience/931issue200826.git
+   5ad05cf..c9e0f20  master -> master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+bash-3.2$ ./flushGit.sh 931issue200826 "Second Commit"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"H"a"d" "w"r"o"n"g" "v"o"l"[1P"l"t" "[1P"."l"o"g"
+[master aec7c54] Had wrong volt.log
+ 1 file changed, 494 insertions(+), 314 deletions(-)
+ rewrite scripts/volt.voltlog (74%)
+Enumerating objects: 7, done.
+Counting objects:  14% (1/7)Counting objects:  28% (2/7)Counting objects:  42% (3/7)Counting objects:  57% (4/7)Counting objects:  71% (5/7)Counting objects:  85% (6/7)Counting objects: 100% (7/7)Counting objects: 100% (7/7), done.
+Delta compression using up to 8 threads
+Compressing objects:  25% (1/4)Compressing objects:  50% (2/4)Compressing objects:  75% (3/4)Compressing objects: 100% (4/4)Compressing objects: 100% (4/4), done.
+Writing objects:  25% (1/4)Writing objects:  50% (2/4)Writing objects:  75% (3/4)Writing objects: 100% (4/4)Writing objects: 100% (4/4), 7.25 KiB | 3.62 MiB/s, done.
+Total 4 (delta 3), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/3)[Kremote: Resolving deltas:  33% (1/3)[Kremote: Resolving deltas:  66% (2/3)[Kremote: Resolving deltas: 100% (3/3)[Kremote: Resolving deltas: 100% (3/3), completed with 3 local objects.[K
+To https://github.com/srmadscience/931issue200826.git
+   c9e0f20..aec7c54  master -> master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+bash-3.2$ ./flushGit.sh 931issue200826 "Had wrong volt.log"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"A"d"d"e"d" "c"r"a"s"h"l"o"g"[1P"[1P"[1P" "l"o"g"
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+Everything up-to-date
+bash-3.2$ pwd
+/Users/drolfe/Desktop/EclipseWorkspace
+bash-3.2$ pwd./flushGit.sh 931issue200826 "Added crash log"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"h"s"_"e"r"r"_"p"i"d"4"6"0"1"
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+Everything up-to-date
+bash-3.2$ unamr -a[K[K[K[Ke -a
+Darwin Davids-MacBook-Pro-8.local 19.5.0 Darwin Kernel Version 19.5.0: Tue May 26 20:41:44 PDT 2020; root:xnu-6153.121.2~2/RELEASE_X86_64 x86_64
+bash-3.2$ ssh hardtofind@`91[K[K[K`91[K[K[K192.168.0.20
+hardtofind@192.168.0.20's password: 
+Welcome to Ubuntu 18.04.5 LTS (GNU/Linux 4.15.0-112-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Fri Aug 28 16:47:26 IST 2020
+
+  System load:  0.11                Processes:             203
+  Usage of /:   43.7% of 450.47GB   Users logged in:       1
+  Memory usage: 42%                 IP address for br0:    192.168.0.20
+  Swap usage:   0%                  IP address for virbr0: 192.168.123.1
+
+ * Are you ready for Kubernetes 1.19? It's nearly here! Try RC3 with
+   sudo snap install microk8s --channel=1.19/candidate --classic
+
+   https://microk8s.io/ has docs and details.
+
+ * Canonical Livepatch is available for installation.
+   - Reduce system reboots and improve kernel security. Activate at:
+     https://ubuntu.com/livepatch
+
+11 packages can be updated.
+2 updates are security updates.
+
+
+Last login: Fri Aug 28 16:45:53 2020 from 192.168.0.5
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ ls
+ [0m[01;32m01-netcfg.yaml[0m   [01;34mimprovednewrelic[0m               [01;34mnewnewrelic[0m                      [01;34mTemplates[0m
+ [01;32marchfile.sh[0m      [01;32minterfaces[0m                     partitiondeleteexample.log       [01;34mtransportdemo[0m
+ [01;34mCassandra[0m        [01;34mjars[0m                           [01;31mpartitiondeleteexample.tar[0m       [01;32mt.sql[0m
+ [01;32mcassandra.yaml[0m   [01;34mjdk-11.0.3[0m                     [01;34mPictures[0m                         [01;34mVideos[0m
+ [01;34mcdemo[0m            [01;31mjdk-11.0.3_linux-x64_bin.tar[0m   pingloop.sh                     [01;34m'VirtualBox VMs'[0m
+ [01;34mDb[0m               [01;34mkafka_2.13-2.6.0[0m               [01;34mprometheus[0m                       voltconsole.log
+ [01;34mDesktop[0m          [01;31mkafka_2.13-2.6.0.tgz[0m           [01;34mPublic[0m                           [01;34mvoltdb-chargingdemo[0m
+ [01;34mDocuments[0m        [01;34mklogs[0m                          [01;32mrhel-server-7.4-x86_64-dvd.iso[0m   [01;34mvoltdb-fantasy-sports-registration[0m
+ [01;34mDownloads[0m        [01;32mks.sql[0m                         runtest.sh                       voltdb-latencyspikeawareclient.log
+ [01;34mdr[0m               [01;32mlinuxx64_12201_database.zip[0m    start_kafka.sh                   [01;31mvoltdb-latencyspikeawareclient.tar[0m
+ dr.sql           [01;32mlrucache_client.jar[0m            start_voltdb.sh                  [01;31mvoltdb-prometheus.jar[0m
+ [01;32meflord.png[0m       [01;32mlrucache_server.jar[0m            [01;32mt2.sql[0m                           [01;34mvoltdbroot[0m
+ [01;34mexport[0m           [01;32mmountarch.sh[0m                   [01;34mtatp[0m                             [01;32mXauthority[0m
+ [01;34mfinevent[0m         [01;32mmountvol.sh[0m                    [01;31mtd_client.jar[0m
+ [01;32mhist.lst[0m         [01;34mMusic[0m                          [01;31mtd.jar[0m
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1@x[1@d[1@c[1@r[1@c[1@o[1@n[1@f[1@l[1@c[1@i[1@t[1@s[1P[1P[1P[1P[1P[1P[1P[1P[1P[1@_[1@c[1@o[1@n[1@f[1@l[1@c[1@i[1P[1P[1@i[1@c[1@y[1@s[1P[1P[1@t[1@s
+-bash: bin/kafka-topics.sh: No such file or directory
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$  c [Kc [K[K[Kbin/kafka-topics.sh --create --topic xdcr_conflicts --bootstrap-server localhost:9092[1@k[1@a[1@f[8@kaloader[1P[1P[1P[1P[1P[1P[1@_[1@2[10@.13-2.6.0/
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Created topic xdcr_conflicts.
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ kafka_2.13-2.6.0/bin/kafka-topics.sh --create --topic xdcr_conflicts --bootstrap-server localhost:9092[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Kkafkaloader[K[K[K[K[K[K_2.13-2.6.0/bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[1P[C[1@ [1@x[1@d[1@c[1@r[1@_[1@c[1@o[1@n[1@f[1@l[1@i[1@c[1@t[1@s
+Topic: xdcr_conflicts	PartitionCount: 1	ReplicationFactor: 1	Configs: segment.bytes=1073741824
+	Topic: xdcr_conflicts	Partition: 0	Leader: 0	Replicas: 0	Isr: 0
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ client_loop: send disconnect: Broken pipe
+bash-3.2$ ssh hardtofind@192.168.0.20
+hardtofind@192.168.0.20's password: 
+Welcome to Ubuntu 18.04.5 LTS (GNU/Linux 4.15.0-112-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Sat Aug 29 17:05:32 IST 2020
+
+  System load:  0.05                Processes:             205
+  Usage of /:   43.7% of 450.47GB   Users logged in:       1
+  Memory usage: 50%                 IP address for br0:    192.168.0.20
+  Swap usage:   0%                  IP address for virbr0: 192.168.123.1
+
+ * Are you ready for Kubernetes 1.19? It's nearly here! Try RC3 with
+   sudo snap install microk8s --channel=1.19/candidate --classic
+
+   https://microk8s.io/ has docs and details.
+
+ * Canonical Livepatch is available for installation.
+   - Reduce system reboots and improve kernel security. Activate at:
+     https://ubuntu.com/livepatch
+
+11 packages can be updated.
+2 updates are security updates.
+
+
+Last login: Sat Aug 29 16:58:22 2020 from 192.168.0.5
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ cd kakfka_2[K[K[K[K[K[Kfla_[K[K[Kka_2.13-2.6.0/
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ bin/kafka-topics.sh --describe --topic xdcr_conflicts --bootstrap-server localhost:9092
+
+Topic: xdcr_conflicts	PartitionCount: 1	ReplicationFactor: 1	Configs: segment.bytes=1073741824
+	Topic: xdcr_conflicts	Partition: 0	Leader: 0	Replicas: 0	Isr: 0
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ 
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ bin/kafka-topics.sh --describe --topic xdcr_conflicts --bootstrap-server localhost:9092[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Ccd kafka_2.13-2.6.0/[Kbin/kafka-topics.sh --describe --topic xdcr_conflicts --bootstrap-server localhost:9092[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Ccd kafka_2.13-2.6.0/[Kexit[K[2Plscd libsls[Kcd kafka_2.13-2.6.0/sh -x start_kafka.sh [1Pcd kafka_2.13-2.6.0/ls[Kcd libsls[Kexitcd kafka_2.13-2.6.0/bin/kafka-topics.sh --describe --topic xdcr_conflicts --bootstrap-server localhost:9092[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Kbin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server llocalhost:9092[C\[K\
+> bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server localhost:9092\^C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ ^C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ ^C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ ^C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server llocalhost:9092\[K[A]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ [K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ 
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ 
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server llocalhost:9092[K[K[K[K[K[K=[K[K[K[K[K[K[K[K[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K[K[K[K[K[K[K[K[K[K[K
+
+
+
+
+boots is not a recognized option
+Option                                   Description                            
+------                                   -----------                            
+--bootstrap-server <String: server to    REQUIRED: The server(s) to connect to. 
+  connect to>                                                                   
+--consumer-property <String:             A mechanism to pass user-defined       
+  consumer_prop>                           properties in the form key=value to  
+                                           the consumer.                        
+--consumer.config <String: config file>  Consumer config properties file. Note  
+                                           that [consumer-property] takes       
+                                           precedence over this config.         
+--enable-systest-events                  Log lifecycle events of the consumer   
+                                           in addition to logging consumed      
+                                           messages. (This is specific for      
+                                           system tests.)                       
+--formatter <String: class>              The name of a class to use for         
+                                           formatting kafka messages for        
+                                           display. (default: kafka.tools.      
+                                           DefaultMessageFormatter)             
+--from-beginning                         If the consumer does not already have  
+                                           an established offset to consume     
+                                           from, start with the earliest        
+                                           message present in the log rather    
+                                           than the latest message.             
+--group <String: consumer group id>      The consumer group id of the consumer. 
+--help                                   Print usage information.               
+--isolation-level <String>               Set to read_committed in order to      
+                                           filter out transactional messages    
+                                           which are not committed. Set to      
+                                           read_uncommitted to read all         
+                                           messages. (default: read_uncommitted)
+--key-deserializer <String:                                                     
+  deserializer for key>                                                         
+--max-messages <Integer: num_messages>   The maximum number of messages to      
+                                           consume before exiting. If not set,  
+                                           consumption is continual.            
+--offset <String: consume offset>        The offset id to consume from (a non-  
+                                           negative number), or 'earliest'      
+                                           which means from beginning, or       
+                                           'latest' which means from end        
+                                           (default: latest)                    
+--partition <Integer: partition>         The partition to consume from.         
+                                           Consumption starts from the end of   
+                                           the partition unless '--offset' is   
+                                           specified.                           
+--property <String: prop>                The properties to initialize the       
+                                           message formatter. Default           
+                                           properties include:                  
+                                         	print.timestamp=true|false            
+                                         	print.key=true|false                  
+                                         	print.value=true|false                
+                                         	key.separator=<key.separator>         
+                                         	line.separator=<line.separator>       
+                                         	key.deserializer=<key.deserializer>   
+                                         	value.deserializer=<value.            
+                                           deserializer>                        
+                                         Users can also pass in customized      
+                                           properties for their formatter; more 
+                                           specifically, users can pass in      
+                                           properties keyed with 'key.          
+                                           deserializer.' and 'value.           
+                                           deserializer.' prefixes to configure 
+                                           their deserializers.                 
+--skip-message-on-error                  If there is an error when processing a 
+                                           message, skip it instead of halt.    
+--timeout-ms <Integer: timeout_ms>       If specified, exit if no message is    
+                                           available for consumption for the    
+                                           specified interval.                  
+--topic <String: topic>                  The topic id to consume on.            
+--value-deserializer <String:                                                   
+  deserializer for values>                                                      
+--version                                Display Kafka version.                 
+--whitelist <String: whitelist>          Regular expression specifying          
+                                           whitelist of topics to include for   
+                                           consumption.                         
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ 
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ 
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ 
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ 
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ ^C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ ^C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ ^C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ ^C
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstarp[K[Kp[Kr[K[Krap-server  localoh
+[2020-08-29 17:34:08,302] ERROR Unknown error when running consumer:  (kafka.tools.ConsoleConsumer$)
+org.apache.kafka.common.KafkaException: Failed to construct kafka consumer
+	at org.apache.kafka.clients.consumer.KafkaConsumer.<init>(KafkaConsumer.java:823)
+	at org.apache.kafka.clients.consumer.KafkaConsumer.<init>(KafkaConsumer.java:667)
+	at kafka.tools.ConsoleConsumer$.run(ConsoleConsumer.scala:68)
+	at kafka.tools.ConsoleConsumer$.main(ConsoleConsumer.scala:55)
+	at kafka.tools.ConsoleConsumer.main(ConsoleConsumer.scala)
+Caused by: org.apache.kafka.common.config.ConfigException: Invalid url in bootstrap.servers: localoh
+	at org.apache.kafka.clients.ClientUtils.parseAndValidateAddresses(ClientUtils.java:59)
+	at org.apache.kafka.clients.ClientUtils.parseAndValidateAddresses(ClientUtils.java:48)
+	at org.apache.kafka.clients.consumer.KafkaConsumer.<init>(KafkaConsumer.java:734)
+	... 4 more
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server llocaloh[A]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ [C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Ctrap-server llocalhost:9092[A]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ [C[C[C[C[C[C[C[C[C[C[5Ptopics.sh --describe --topic xdcr_conflicts --bootstrap-server localhost:9092
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Ccd kafka_2.13-2.6.0/[Kbin/kafka-topics.sh --describe --topic xdcr_conflicts --bootstrap-server localhost:9092[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Ccd kafka_2.13-2.6.0/[Kexit[K[2Plscd libsls[Kcd kafka_2.13-2.6.0/sh -x start_kafka.sh [8Pkill -9 281127344ps -deaf | grep java | awk '{ print $2 }'[20Psh -x start_kafka.sh [12Pcd  ../..sh -x start_kafka.sh [2Pkill -9 26375 26376ps -deaf |grep javavi server.properties ls[Kcd configkafka_2.13-2.6.0/[K[K[K[K[K[K[K[K[K[Kbin/kafka-topics.sh --list --zookeeper localhost:2181.
+Exception in thread "main" java.lang.NumberFormatException: For input string: "2181."
+	at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)
+	at java.base/java.lang.Integer.parseInt(Integer.java:652)
+	at java.base/java.lang.Integer.parseInt(Integer.java:770)
+	at org.apache.zookeeper.client.ConnectStringParser.<init>(ConnectStringParser.java:75)
+	at org.apache.zookeeper.ZooKeeper.createDefaultHostProvider(ZooKeeper.java:1311)
+	at org.apache.zookeeper.ZooKeeper.<init>(ZooKeeper.java:1011)
+	at org.apache.zookeeper.ZooKeeper.<init>(ZooKeeper.java:738)
+	at kafka.zookeeper.ZooKeeperClient.<init>(ZooKeeperClient.scala:111)
+	at kafka.zk.KafkaZkClient$.apply(KafkaZkClient.scala:1865)
+	at kafka.admin.TopicCommand$ZookeeperTopicService$.apply(TopicCommand.scala:360)
+	at kafka.admin.TopicCommand$.main(TopicCommand.scala:55)
+	at kafka.admin.TopicCommand.main(TopicCommand.scala)
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ bin/kafka-topics.sh --list --zookeeper localhost:2181.[K
+__consumer_offsets
+quickstart-events
+voltdbexportVOLTDB_AUTOGEN_XDCR_CONFLICTS_PARTITIONED
+xdcr_conflicts
+xdxr_conflicts
+]0;hardtofind@hardtofind: ~/kafka_2.13-2.6.0[01;32mhardtofind@hardtofind[00m:[01;34m~/kafka_2.13-2.6.0[00m$ cd 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ vi start_kafka.sh 
+[?2004h[?1049h[22;0;0t[?1h=[?2004h[1;31r[?12h[?12l[27m[23m[29m[m[H[2J[?25l[31;1H"start_kafka.sh" 6L, 168C[2;1H▽[6n[2;1H  [1;1H[>c]10;?]11;?[1;1H[34m#!/bin/sh[m
+
+rm [35m-rf[m /tmp/kafka-logs/
+[38;5;130mcd[m kafka_2.13-2.[31m6[m.[31m0[m
+bin/zookeeper-server-start.sh config/zookeeper.properties &
+bin/kafka-server-start.sh config/server.properties &
+[94m~                                                                                                                                     [8;1H~                                                                                                                                     [9;1H~                                                                                                                                     [10;1H~                                                                                                                                     [11;1H~                                                                                                                                     [12;1H~                                                                                                                                     [13;1H~                                                                                                                                     [14;1H~                                                                                                                                     [15;1H~                                                                                                                                     [16;1H~                                                                                                                                     [17;1H~                                                                                                                                     [18;1H~                                                                                                                                     [19;1H~                                                                                                                                     [20;1H~                                                                                                                                     [21;1H~                                                                                                                                     [22;1H~                                                                                                                                     [23;1H~                                                                                                                                     [24;1H~                                                                                                                                     [25;1H~                                                                                                                                     [26;1H~                                                                                                                                     [27;1H~                                                                                                                                     [28;1H~                                                                                                                                     [29;1H~                                                                                                                                     [30;1H~                                                                                                                                     [m[31;117H6,1[11CAll[6;1H[?25h[?25l[31;107Hk[6;1H[31;107H [5;1H[31;117H5[5;1H[?25h[?25l[31;107Hk[5;1H[31;107H [4;1H[31;117H4[4;1H[?25h[?25l[31;107H:[4;1H[31;1H[K[31;1H:[?2004h[?25hq[?25l[?25h[?25l[?2004l[31;1H[K[31;1H[?2004l[?1l>[?25h[?1049l[23;0;0t]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ ps de[K[K-deaf | grep zookeeper | [K awl [K[Kk "[ print %[K[K[K[K[K[K[K[K[K[K'{ print $2 }'
+6091
+6864
+18208
+18632
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ ps -deaf | grep zookeeper | awk '{ print $2 }'[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[28Pvi start_kafka.sh 
+[?2004h[?1049h[22;0;0t[?1h=[?2004h[1;31r[?12h[?12l[27m[23m[29m[m[H[2J[?25l[31;1H"start_kafka.sh" 6L, 168C[2;1H▽[6n[2;1H  [1;1H[>c]10;?]11;?[1;1H[34m#!/bin/sh[m
+
+rm [35m-rf[m /tmp/kafka-logs/
+[38;5;130mcd[m kafka_2.13-2.[31m6[m.[31m0[m
+bin/zookeeper-server-start.sh config/zookeeper.properties &
+bin/kafka-server-start.sh config/server.properties &
+[94m~                                                                                                                                     [8;1H~                                                                                                                                     [9;1H~                                                                                                                                     [10;1H~                                                                                                                                     [11;1H~                                                                                                                                     [12;1H~                                                                                                                                     [13;1H~                                                                                                                                     [14;1H~                                                                                                                                     [15;1H~                                                                                                                                     [16;1H~                                                                                                                                     [17;1H~                                                                                                                                     [18;1H~                                                                                                                                     [19;1H~                                                                                                                                     [20;1H~                                                                                                                                     [21;1H~                                                                                                                                     [22;1H~                                                                                                                                     [23;1H~                                                                                                                                     [24;1H~                                                                                                                                     [25;1H~                                                                                                                                     [26;1H~                                                                                                                                     [27;1H~                                                                                                                                     [28;1H~                                                                                                                                     [29;1H~                                                                                                                                     [30;1H~                                                                                                                                     [m[31;117H4,1[11CAll[4;1H[?25h[?25l[31;107H:[4;1H[31;1H[K[31;1H:[?2004h[?25hq[?25l[?25h[?25l[?2004l[31;1H[K[31;1H[?2004l[?1l>[?25h[?1049l[23;0;0t]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ vi start_kafka.sh [K
+[?2004h[?1049h[22;0;0t[?1h=[?2004h[1;31r[?12h[?12l[27m[23m[29m[m[H[2J[?25l[31;1H"start_kafka.sh" 6L, 168C[2;1H▽[6n[2;1H  [1;1H[>c]10;?]11;?[1;1H[34m#!/bin/sh[m
+
+rm [35m-rf[m /tmp/kafka-logs/
+[38;5;130mcd[m kafka_2.13-2.[31m6[m.[31m0[m
+bin/zookeeper-server-start.sh config/zookeeper.properties &
+bin/kafka-server-start.sh config/server.properties &
+[94m~                                                                                                                                     [8;1H~                                                                                                                                     [9;1H~                                                                                                                                     [10;1H~                                                                                                                                     [11;1H~                                                                                                                                     [12;1H~                                                                                                                                     [13;1H~                                                                                                                                     [14;1H~                                                                                                                                     [15;1H~                                                                                                                                     [16;1H~                                                                                                                                     [17;1H~                                                                                                                                     [18;1H~                                                                                                                                     [19;1H~                                                                                                                                     [20;1H~                                                                                                                                     [21;1H~                                                                                                                                     [22;1H~                                                                                                                                     [23;1H~                                                                                                                                     [24;1H~                                                                                                                                     [25;1H~                                                                                                                                     [26;1H~                                                                                                                                     [27;1H~                                                                                                                                     [28;1H~                                                                                                                                     [29;1H~                                                                                                                                     [30;1H~                                                                                                                                     [m[31;117H4,1[11CAll[4;1H[?25h[?25l[31;107H^M[4;1H[31;107H  [5;1H[31;117H5[5;1H[?25h[?25l[31;107H:[5;1H[31;1H[K[31;1H:[?2004h[?25hq[?25l[?25h[?25l[?2004l[31;1H[K[31;1H[?2004l[?1l>[?25h[?1049l[23;0;0t]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ 
+]0;hardtofind@hardtofind: ~[01;32mhardtofind@hardtofind[00m:[01;34m~[00m$ vi start_kafka.sh
