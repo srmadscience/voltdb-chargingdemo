@@ -23,7 +23,7 @@ PARTITION TABLE user_table ON COLUMN userid;
 DR table user_table;
 
 create table user_recent_transactions
- MIGRATE TO TARGET user_transactions
+-- MIGRATE TO TARGET user_transactions
 (userid bigint not null 
 ,user_txn_id varchar(128)
 ,txn_time TIMESTAMP DEFAULT NOW  not null 
@@ -51,7 +51,7 @@ export to target finevent
 ,purpose varchar(80) not null);
 
 create table user_usage_table
- MIGRATE TO TARGET user_usage_table_stale_entries
+-- MIGRATE TO TARGET user_usage_table_stale_entries
 (userid bigint not null
 ,productid bigint not null
 ,allocated_units bigint not null
