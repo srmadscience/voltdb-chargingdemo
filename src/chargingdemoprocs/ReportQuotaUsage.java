@@ -70,10 +70,10 @@ public class ReportQuotaUsage extends VoltProcedure {
     public static final SQLStmt removeOldestTransaction = new SQLStmt("DELETE " 
             + "FROM user_recent_transactions "
             + "WHERE userid = ? "
-            + "AND txn_time < DATEADD(MILLISECOND,?,NOW)"
+            + "AND SINCE_EPOCH(Second,txn_time) < SINCE_EPOCH(Second,DATEADD(MILLISECOND, ?,NOW))"
             + "ORDER BY txn_time,userid,user_txn_id LIMIT 1;");
 
-    private static final long FIVE_MINUTES_IN_MS = 1000 * 60 * 5;
+    private static final long FIVE_MINUTES_AGO_IN_MS = 1000 * 60 * -5;
 
     
     // @formatter:on
@@ -92,7 +92,7 @@ public class ReportQuotaUsage extends VoltProcedure {
     voltQueueSQL(getUser, userId);
     voltQueueSQL(getProduct, productId);
     voltQueueSQL(getTxn, userId, txnId);
-    voltQueueSQL(removeOldestTransaction, userId,FIVE_MINUTES_IN_MS);
+    voltQueueSQL(removeOldestTransaction, userId, FIVE_MINUTES_AGO_IN_MS);
 
     VoltTable[] results = voltExecuteSQL();
 
